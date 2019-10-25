@@ -81,7 +81,8 @@ public class RSA implements ISign {
             PublicKey pubKey = keyFactory.generatePublic(keySpec);
             Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
             signature.initVerify(pubKey);
-            verify = signature.verify(data);
+            signature.update(data);
+            verify = signature.verify(sign);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             log.error(e.getMessage());
             throw new SignException(e.getMessage(), e);

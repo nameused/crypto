@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package org.crypto.sign.international;
+package org.crypto.sign.gm;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
 import org.crypto.common.exception.SignException;
 import org.crypto.common.log.CryptoLog;
 import org.crypto.common.log.CryptoLogFactory;
@@ -27,40 +29,37 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 /**
- * RSA签名算法实现
- *
  * @Author: zhangmingyang
  * @Date: 2019/10/25
  * @Company Dingxuan
  */
-public class RSA implements ISign {
-    private static CryptoLog log = CryptoLogFactory.getLog(RSA.class);
-    private static final String KEY_ALGORITHM = "RSA";
-    private static final String SIGNATURE_ALGORITHM = "MD5WithRSA";
-
+public class SM2 implements ISign {
+    private static CryptoLog log = CryptoLogFactory.getLog(SM2.class);
+    private static final String KEY_ALGORITHM = "EC";
+    private static final String SIGNATURE_ALGORITHM = "SM3WithSM2";
+    private static final String PROVIDER = "BC";
+    private static final String KEY_GEN_PARAMTER = "sm2p256v1";
 
     @Override
     public KeyPair genKeyPair(int keySize) throws SignException {
-        KeyPairGenerator keyPairGenerator;
-        KeyPair keyPair;
+        KeyPairGenerator generator = null;
         try {
-            keyPairGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM);
-            keyPairGenerator.initialize(keySize);
-            keyPair = keyPairGenerator.genKeyPair();
-        } catch (NoSuchAlgorithmException e) {
+            Security.addProvider(new BouncyCastleProvider());
+            generator = KeyPairGenerator.getInstance(KEY_ALGORITHM, PROVIDER);
+            generator.initialize(new ECNamedCurveGenParameterSpec(KEY_GEN_PARAMTER));
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             log.error(e.getMessage());
             throw new SignException(e.getMessage(), e);
         }
-
-        return keyPair;
+        return generator.genKeyPair();
     }
 
     @Override
     public byte[] sign(byte[] data, byte[] privateKey) throws SignException {
-        PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey);
         Signature signature;
         byte[] signValue;
         try {
+            PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey);
             KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
             PrivateKey priKey = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
             signature = Signature.getInstance(SIGNATURE_ALGORITHM);

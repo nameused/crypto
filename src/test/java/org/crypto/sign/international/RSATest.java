@@ -34,11 +34,11 @@ public class RSATest {
 
     @Test
     public void sign() throws SignException {
-        String data="this is test data";
-        byte[] signature=rsa.sign(data.getBytes(),keyPair.getPrivate().getEncoded());
+        String data = "this is test data";
+        byte[] signature = rsa.sign(data.getBytes(), keyPair.getPrivate().getEncoded());
         System.out.println(Hex.toHexString(signature).length());
-        boolean result=rsa.verify(data.getBytes(),keyPair.getPublic().getEncoded(),signature);
-        System.out.println("verify result:"+result);
+        boolean result = rsa.verify(data.getBytes(), keyPair.getPublic().getEncoded(), signature);
+        System.out.println("verify result:" + result);
 
     }
 }

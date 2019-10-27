@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.crypto.sign.gm;
+package org.crypto.sign.international;
 
 /**
  * @Author: zhangmingyang
  * @Date: 2019/10/25
  * @Company Dingxuan
  */
-public class SM {
+public class ECDSA {
 }

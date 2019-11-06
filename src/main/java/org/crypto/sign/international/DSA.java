@@ -22,6 +22,8 @@ import org.crypto.common.log.CryptoLogFactory;
 import org.crypto.intfs.ISign;
 
 import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * DSA 签名算法实现
@@ -40,12 +42,12 @@ public class DSA implements ISign {
     }
 
     @Override
-    public byte[] sign(byte[] data, byte[] privateKey) throws SignException {
+    public byte[] sign(byte[] data, PrivateKey privateKey) throws SignException {
         return new byte[0];
     }
 
     @Override
-    public boolean verify(byte[] data, byte[] publicKey, byte[] sign) throws SignException {
+    public boolean verify(byte[] data, PublicKey publicKey, byte[] sign) throws SignException {
         return false;
     }
 }

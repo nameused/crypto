@@ -56,8 +56,8 @@ public class RSA implements ISign {
     }
 
     @Override
-    public byte[] sign(byte[] data, byte[] privateKey) throws SignException {
-        PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey);
+    public byte[] sign(byte[] data, PrivateKey privateKey) throws SignException {
+        PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey.getEncoded());
         Signature signature;
         byte[] signValue;
         try {
@@ -75,10 +75,10 @@ public class RSA implements ISign {
     }
 
     @Override
-    public boolean verify(byte[] data, byte[] publicKey, byte[] sign) throws SignException {
+    public boolean verify(byte[] data, PublicKey publicKey, byte[] sign) throws SignException {
         boolean verify;
         try {
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKey);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKey.getEncoded());
             KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
             PublicKey pubKey = keyFactory.generatePublic(keySpec);
             Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);

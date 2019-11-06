@@ -3,6 +3,8 @@ package org.crypto.intfs;
 import org.crypto.common.exception.SignException;
 
 import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * 签名接口
@@ -20,7 +22,7 @@ public interface ISign {
      * @param privateKey
      * @return
      */
-    byte[] sign(byte[] data, byte[] privateKey) throws SignException;
+    byte[] sign(byte[] data, PrivateKey privateKey) throws SignException;
 
     /**
      * 数据验签
@@ -29,5 +31,5 @@ public interface ISign {
      * @param sign
      * @return
      */
-    boolean verify(byte[] data,byte[] publicKey,byte[] sign) throws SignException;
+    boolean verify(byte[] data, PublicKey publicKey, byte[] sign) throws SignException;
 }

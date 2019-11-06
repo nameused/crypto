@@ -55,11 +55,11 @@ public class SM2 implements ISign {
     }
 
     @Override
-    public byte[] sign(byte[] data, byte[] privateKey) throws SignException {
+    public byte[] sign(byte[] data, PrivateKey privateKey) throws SignException {
         Signature signature;
         byte[] signValue;
         try {
-            PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey);
+            PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey.getEncoded());
             KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
             PrivateKey priKey = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
             signature = Signature.getInstance(SIGNATURE_ALGORITHM);
@@ -74,10 +74,10 @@ public class SM2 implements ISign {
     }
 
     @Override
-    public boolean verify(byte[] data, byte[] publicKey, byte[] sign) throws SignException {
+    public boolean verify(byte[] data, PublicKey publicKey, byte[] sign) throws SignException {
         boolean verify;
         try {
-            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKey);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKey.getEncoded());
             KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
             PublicKey pubKey = keyFactory.generatePublic(keySpec);
             Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);

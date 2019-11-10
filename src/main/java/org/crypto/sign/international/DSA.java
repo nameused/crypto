@@ -21,12 +21,14 @@ import org.crypto.common.log.CryptoLog;
 import org.crypto.common.log.CryptoLogFactory;
 import org.crypto.intfs.ISign;
 
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 /**
  * DSA 签名算法实现
+ *
  * @Author: zhangmingyang
  * @Date: 2019/10/25
  * @Company Dingxuan
@@ -38,16 +40,54 @@ public class DSA implements ISign {
 
     @Override
     public KeyPair genKeyPair(int keySize) throws SignException {
-        return null;
+        KeyPairGenerator keyPairGenerator;
+        KeyPair keyPair;
+        try {
+            keyPairGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM);
+            keyPairGenerator.initialize(keySize);
+            keyPair = keyPairGenerator.genKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            log.error(e.getMessage());
+            throw new SignException(e.getMessage(), e);
+        }
+        return keyPair;
     }
 
     @Override
     public byte[] sign(byte[] data, PrivateKey privateKey) throws SignException {
-        return new byte[0];
+
+        PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey.getEncoded());
+        Signature signature;
+        byte[] signValue;
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
+            PrivateKey priKey = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
+            signature = Signature.getInstance(SIGNATURE_ALGORITHM);
+            signature.initSign(priKey);
+            signature.update(data);
+            signValue = signature.sign();
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            log.error(e.getMessage());
+            throw new SignException(e.getMessage(), e);
+        }
+        return signValue;
     }
 
     @Override
     public boolean verify(byte[] data, PublicKey publicKey, byte[] sign) throws SignException {
-        return false;
+        boolean verify;
+        try {
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKey.getEncoded());
+            KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
+            PublicKey pubKey = keyFactory.generatePublic(keySpec);
+            Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
+            signature.initVerify(pubKey);
+            signature.update(data);
+            verify = signature.verify(sign);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            log.error(e.getMessage());
+            throw new SignException(e.getMessage(), e);
+        }
+        return verify;
     }
 }

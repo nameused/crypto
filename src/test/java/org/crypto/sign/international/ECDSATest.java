@@ -1,6 +1,8 @@
 package org.crypto.sign.international;
 
 import com.sun.org.apache.xml.internal.security.utils.Base64;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.util.encoders.Hex;
 import org.crypto.common.exception.SignException;
 import org.junit.Before;
@@ -8,19 +10,20 @@ import org.junit.Test;
 
 import java.security.KeyPair;
 
+import static org.junit.Assert.*;
 
 /**
  * @Author: zhangmingyang
- * @Date: 2019/11/6
+ * @Date: 2019/11/10
  * @Company Dingxuan
  */
-public class DSATest {
-    DSA dsa;
-    KeyPair keyPair;
+public class ECDSATest {
+    private ECDSA ecdsa;
+    private KeyPair keyPair;
     @Before
     public void setup() throws SignException {
-        dsa=new DSA();
-        keyPair=dsa.genKeyPair(1024);
+        ecdsa=new ECDSA();
+        keyPair=ecdsa.genKeyPair(256);
     }
 
     @Test
@@ -32,10 +35,9 @@ public class DSATest {
     @Test
     public void sign() throws SignException {
         String data = "this is test data";
-        byte[] signature = dsa.sign(data.getBytes(), keyPair.getPrivate());
-        System.out.println("签名值16进制值:"+Hex.toHexString(signature));
+        byte[] signature = ecdsa.sign(data.getBytes(), keyPair.getPrivate());
         System.out.println("签名长度："+signature.length);
-        boolean result = dsa.verify(data.getBytes(), keyPair.getPublic(), signature);
+        boolean result = ecdsa.verify(data.getBytes(), keyPair.getPublic(), signature);
         System.out.println("verify result:" + result);
     }
 

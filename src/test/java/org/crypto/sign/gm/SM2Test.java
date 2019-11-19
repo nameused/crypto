@@ -37,6 +37,7 @@ public class SM2Test {
         String data = "this is test data";
         byte[] signature = sm2.sign(data.getBytes(), keyPair.getPrivate());
 
+        System.out.println("签名长度："+signature.length);
         BCECPrivateKey bcecPrivateKey = (BCECPrivateKey) keyPair.getPrivate();
         System.out.println("私钥长度："+bcecPrivateKey.getD().toByteArray().length);
         System.out.println("私钥内容："+ Hex.toHexString(bcecPrivateKey.getD().toByteArray()));

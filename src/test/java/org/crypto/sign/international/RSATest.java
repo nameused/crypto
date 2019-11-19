@@ -32,6 +32,7 @@ public class RSATest {
     public void sign() throws SignException {
         String data = "this is test data";
         byte[] signature = rsa.sign(data.getBytes(), keyPair.getPrivate());
+        System.out.println("签名长度："+signature.length);
         System.out.println(Hex.toHexString(signature).length());
         boolean result = rsa.verify(data.getBytes(), keyPair.getPublic(), signature);
         System.out.println("verify result:" + result);

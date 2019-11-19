@@ -14,45 +14,45 @@
  * limitations under the License.
  */
 
-package org.crypto.sign.international;
+package org.crypto.algorithm.international.sign;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.crypto.common.exception.SignException;
 import org.crypto.common.log.CryptoLog;
 import org.crypto.common.log.CryptoLogFactory;
 import org.crypto.intfs.ISign;
 
 import java.security.*;
+import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 /**
- * RSA签名算法实现
- *
  * @Author: zhangmingyang
  * @Date: 2019/10/25
  * @Company Dingxuan
  */
-public class RSA implements ISign {
-    private static CryptoLog log = CryptoLogFactory.getLog(RSA.class);
-    private static final String KEY_ALGORITHM = "RSA";
-    private static final String SIGNATURE_ALGORITHM = "MD5WithRSA";
-
+public class ECDSA implements ISign {
+    private static CryptoLog log = CryptoLogFactory.getLog(ECDSA.class);
+    private static final String KEY_ALGORITHM = "EC";
+    private static final String PROVIDER = "BC";
+    private static final String SIGNATURE_ALGORITHM = "SHA256withECDSA";
+    private static final String KEY_GEN_PARAMTER = "secp256r1";
 
     @Override
     public KeyPair genKeyPair(int keySize) throws SignException {
-        KeyPairGenerator keyPairGenerator;
-        KeyPair keyPair;
+        KeyPairGenerator keyPairGenerator = null;
         try {
-            keyPairGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM);
+            Security.addProvider(new BouncyCastleProvider());
+            keyPairGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM, PROVIDER);
+            keyPairGenerator.initialize(new ECGenParameterSpec(KEY_GEN_PARAMTER));
             keyPairGenerator.initialize(keySize);
-            keyPair = keyPairGenerator.genKeyPair();
-        } catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchProviderException | InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
             log.error(e.getMessage());
             throw new SignException(e.getMessage(), e);
         }
-
-        return keyPair;
+        return keyPairGenerator.genKeyPair();
     }
 
     @Override

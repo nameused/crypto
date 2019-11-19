@@ -1,9 +1,6 @@
-package org.crypto.sign.international;
+package org.crypto.algorithm.international.sign;
 
 import com.sun.org.apache.xml.internal.security.utils.Base64;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.bouncycastle.util.encoders.Hex;
 import org.crypto.common.exception.SignException;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +11,7 @@ import static org.junit.Assert.*;
 
 /**
  * @Author: zhangmingyang
- * @Date: 2019/11/10
+ * @Date: 2019/11/19
  * @Company Dingxuan
  */
 public class ECDSATest {
@@ -43,5 +40,4 @@ public class ECDSATest {
 
     @Test
     public void verify() {
-    }
-}
+    }}

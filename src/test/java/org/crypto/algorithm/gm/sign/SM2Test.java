@@ -1,5 +1,4 @@
-package org.crypto.sign.gm;
-
+package org.crypto.algorithm.gm.sign;
 
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
@@ -8,11 +7,13 @@ import org.bouncycastle.util.encoders.Hex;
 import org.crypto.common.exception.SignException;
 import org.junit.Before;
 import org.junit.Test;
-import java.security.*;
+
+import java.security.KeyPair;
+
 
 /**
  * @Author: zhangmingyang
- * @Date: 2019/10/25
+ * @Date: 2019/11/19
  * @Company Dingxuan
  */
 public class SM2Test {
@@ -50,5 +51,4 @@ public class SM2Test {
         boolean result = sm2.verify(data.getBytes(), keyPair.getPublic(), signature);
         System.out.println("verify result:" + result);
     }
-
 }

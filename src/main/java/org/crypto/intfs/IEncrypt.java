@@ -6,5 +6,6 @@ package org.crypto.intfs;
  * @Company Dingxuan
  */
 public interface IEncrypt {
+    byte[] enprypt();
 
 }

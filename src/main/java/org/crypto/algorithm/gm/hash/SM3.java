@@ -16,8 +16,16 @@
 
 package org.crypto.algorithm.gm.hash;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.crypto.common.exception.HashException;
+import org.crypto.common.log.CryptoLog;
+import org.crypto.common.log.CryptoLogFactory;
 import org.crypto.intfs.IHash;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 
 /**
  * @Author: zhangmingyang
@@ -25,8 +33,21 @@ import org.crypto.intfs.IHash;
  * @Company Dingxuan
  */
 public class SM3 implements IHash {
+    private static CryptoLog log = CryptoLogFactory.getLog(SM3.class);
     @Override
     public byte[] hash(byte[] data) throws HashException {
-        return new byte[0];
+        if (ArrayUtils.isEmpty(data)) {
+            throw new HashException("Some input is empty");
+        }
+        Security.addProvider(new BouncyCastleProvider());
+        MessageDigest messageDigest;
+        try {
+            messageDigest = MessageDigest.getInstance("sm3");
+        } catch (NoSuchAlgorithmException e) {
+            log.error(e.getMessage());
+            throw new HashException(e);
+        }
+        messageDigest.update(data);
+        return messageDigest.digest();
     }
 }

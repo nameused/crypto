@@ -16,10 +16,16 @@
 
 package org.crypto.algorithm.gm.encryption;
 
+import org.crypto.intfs.IEncrypt;
+
 /**
  * @Author: zhangmingyang
  * @Date: 2019/11/19
  * @Company Dingxuan
  */
-public class SM4 {
+public class SM4 implements IEncrypt {
+    @Override
+    public byte[] enprypt() {
+        return new byte[0];
+    }
 }

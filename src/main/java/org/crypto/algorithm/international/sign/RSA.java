@@ -36,7 +36,7 @@ import java.security.spec.X509EncodedKeySpec;
 public class RSA implements ISign {
     private static CryptoLog log = CryptoLogFactory.getLog(RSA.class);
     private static final String KEY_ALGORITHM = "RSA";
-    private static final String SIGNATURE_ALGORITHM = "MD5WithRSA";
+    private static final String SIGNATURE_ALGORITHM = "SHA256WithRSA";
 
 
     @Override

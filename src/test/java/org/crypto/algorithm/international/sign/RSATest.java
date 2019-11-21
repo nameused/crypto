@@ -21,7 +21,7 @@ public class RSATest {
     @Before
     public void setup() throws SignException {
         rsa = new RSA();
-        keyPair = rsa.genKeyPair(1024);
+        keyPair = rsa.genKeyPair(2048);
     }
 
     @Test
@@ -34,8 +34,7 @@ public class RSATest {
     public void sign() throws SignException {
         String data = "this is test data";
         byte[] signature = rsa.sign(data.getBytes(), keyPair.getPrivate());
-        System.out.println("签名长度："+signature.length);
-        System.out.println(Hex.toHexString(signature).length());
+        System.out.println("签名长度："+signature.length*8);
         boolean result = rsa.verify(data.getBytes(), keyPair.getPublic(), signature);
         System.out.println("verify result:" + result);
 

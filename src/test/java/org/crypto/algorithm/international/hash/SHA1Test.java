@@ -19,7 +19,7 @@ public class SHA1Test {
         String testData = "test message";
         byte[] hash = sha1.hash(testData.getBytes());
         Assert.assertNotNull(hash);
-        System.out.println("signature length:"+hash.length*8);
+        System.out.println("digest length:"+hash.length*8);
         System.out.println("test message‘s hash value:" + Hex.toHexString(hash));
     }
 }

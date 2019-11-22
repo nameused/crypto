@@ -1,10 +1,8 @@
 package org.crypto.algorithm.gm.sign;
 
 import com.sun.org.apache.xml.internal.security.utils.Base64;
-import org.bouncycastle.asn1.*;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
-import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.crypto.common.exception.SignException;
 import org.crypto.common.utils.GmUtil;
@@ -12,8 +10,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.math.BigInteger;
 import java.security.KeyPair;
 
 

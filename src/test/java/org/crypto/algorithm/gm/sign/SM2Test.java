@@ -19,6 +19,8 @@ import java.security.KeyPair;
  * @Company Dingxuan
  */
 public class SM2Test {
+
+    private static final String SIGNATURE_ALGORITHM = "SM3WithSM2";
     private SM2 sm2;
     KeyPair keyPair;
 
@@ -39,7 +41,7 @@ public class SM2Test {
 
         String data = "this is test data";
         System.out.println("原文：" + Hex.toHexString(data.getBytes()));
-        byte[] signature = sm2.sign(data.getBytes(), keyPair.getPrivate());
+        byte[] signature = sm2.sign(data.getBytes(), keyPair.getPrivate(),SIGNATURE_ALGORITHM);
 
         System.out.println("BC实现的签名值：" + Hex.toHexString(signature));
         System.out.println("签名长度：" + signature.length * 8);
@@ -62,7 +64,7 @@ public class SM2Test {
         System.out.println("公钥长度：" + bcecPublicKey.getQ().getEncoded(false).length);
         System.out.println("公钥内容：" + Hex.toHexString(bcecPublicKey.getQ().getEncoded(false)));
 
-        boolean result = sm2.verify(data.getBytes(), keyPair.getPublic(), signature);
+        boolean result = sm2.verify(data.getBytes(), keyPair.getPublic(), signature,SIGNATURE_ALGORITHM);
         System.out.println("verify result:" + result);
     }
 }

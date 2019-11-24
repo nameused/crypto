@@ -22,7 +22,7 @@ public interface ISign {
      * @param privateKey
      * @return
      */
-    byte[] sign(byte[] data, PrivateKey privateKey) throws SignException;
+    byte[] sign(byte[] data, PrivateKey privateKey,String signatrueAlgorithm) throws SignException;
 
     /**
      * 数据验签
@@ -31,5 +31,6 @@ public interface ISign {
      * @param sign
      * @return
      */
-    boolean verify(byte[] data, PublicKey publicKey, byte[] sign) throws SignException;
+    boolean verify(byte[] data, PublicKey publicKey, byte[] sign,String signatrueAlgorithm) throws SignException;
+
 }

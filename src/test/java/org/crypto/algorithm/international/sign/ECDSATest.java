@@ -15,6 +15,7 @@ import static org.junit.Assert.*;
  * @Company Dingxuan
  */
 public class ECDSATest {
+    private static final String SIGNATURE_ALGORITHM = "SHA256withECDSA";
     private ECDSA ecdsa;
     private KeyPair keyPair;
     @Before
@@ -32,9 +33,9 @@ public class ECDSATest {
     @Test
     public void sign() throws SignException {
         String data = "this is test data";
-        byte[] signature = ecdsa.sign(data.getBytes(), keyPair.getPrivate());
+        byte[] signature = ecdsa.sign(data.getBytes(), keyPair.getPrivate(),SIGNATURE_ALGORITHM);
         System.out.println("签名长度："+signature.length);
-        boolean result = ecdsa.verify(data.getBytes(), keyPair.getPublic(), signature);
+        boolean result = ecdsa.verify(data.getBytes(), keyPair.getPublic(), signature,SIGNATURE_ALGORITHM);
         System.out.println("verify result:" + result);
     }
 

@@ -36,7 +36,6 @@ import java.security.spec.X509EncodedKeySpec;
 public class SM2 implements ISign {
     private static CryptoLog log = CryptoLogFactory.getLog(SM2.class);
     private static final String KEY_ALGORITHM = "EC";
-    private static final String SIGNATURE_ALGORITHM = "SM3WithSM2";
     private static final String PROVIDER = "BC";
     private static final String KEY_GEN_PARAMTER = "sm2p256v1";
 
@@ -55,14 +54,14 @@ public class SM2 implements ISign {
     }
 
     @Override
-    public byte[] sign(byte[] data, PrivateKey privateKey) throws SignException {
+    public byte[] sign(byte[] data, PrivateKey privateKey,String signatureAlgorithm) throws SignException {
         Signature signature;
         byte[] signValue;
         try {
             PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey.getEncoded());
             KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
             PrivateKey priKey = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
-            signature = Signature.getInstance(SIGNATURE_ALGORITHM);
+            signature = Signature.getInstance(signatureAlgorithm);
             signature.initSign(priKey);
             signature.update(data);
             signValue = signature.sign();
@@ -74,13 +73,13 @@ public class SM2 implements ISign {
     }
 
     @Override
-    public boolean verify(byte[] data, PublicKey publicKey, byte[] sign) throws SignException {
+    public boolean verify(byte[] data, PublicKey publicKey, byte[] sign,String signatureAlgorithm) throws SignException {
         boolean verify;
         try {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKey.getEncoded());
             KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
             PublicKey pubKey = keyFactory.generatePublic(keySpec);
-            Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
+            Signature signature = Signature.getInstance(signatureAlgorithm);
             signature.initVerify(pubKey);
             signature.update(data);
             verify = signature.verify(sign);

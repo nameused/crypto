@@ -9,20 +9,24 @@ import org.crypto.common.exception.EncryptException;
  */
 public interface IEncrypt {
     /**
-     * 数据加密
+     * 加密
      *
      * @param key
+     * @param keyIv
      * @param originalText
      * @return
+     * @throws EncryptException
      */
-    byte[] enprypt(byte[] key, byte[] originalText) throws EncryptException;
+    byte[] enprypt(byte[] key, byte[] keyIv, byte[] originalText) throws EncryptException;
 
     /**
-     * 数据解密
+     * 解密
      *
      * @param key
+     * @param keyIv
      * @param encryptText
      * @return
+     * @throws EncryptException
      */
-    byte[] decrypt(byte[] key, byte[] encryptText) throws EncryptException;
+    byte[] decrypt(byte[] key, byte[] keyIv, byte[] encryptText) throws EncryptException;
 }

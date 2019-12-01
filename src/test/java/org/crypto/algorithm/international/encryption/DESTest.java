@@ -28,14 +28,11 @@ public class DESTest {
     public void enprypt() throws EncryptException {
         System.out.println("test Data HexString is:"+Hex.toHexString(testData.getBytes()));
         System.out.println("des key is: " + Hex.toHexString(key));
-        byte[] encryptData = des.enprypt(testData.getBytes(), testData.getBytes());
+        byte[] encryptData = des.enprypt(key, null,testData.getBytes());
         System.out.println("encrypt Data: " + Hex.toHexString(encryptData));
-        byte[] originalText=des.decrypt(testData.getBytes(),encryptData);
+        byte[] originalText=des.decrypt(key,null,encryptData);
         System.out.println("originalText: "+Hex.toHexString(originalText));
 
     }
 
-    @Test
-    public void decrypt() {
-    }
 }

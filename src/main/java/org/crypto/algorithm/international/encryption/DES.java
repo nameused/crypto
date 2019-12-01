@@ -85,7 +85,7 @@ public class DES implements IEncrypt {
     }
 
     @Override
-    public byte[] enprypt(byte[] key, byte[] originalText) throws EncryptException {
+    public byte[] enprypt(byte[] key, byte[] keyIv, byte[] originalText) throws EncryptException {
         Key secretKey = convertKey(key);
         byte[] encryptData = null;
         try {
@@ -101,7 +101,7 @@ public class DES implements IEncrypt {
     }
 
     @Override
-    public byte[] decrypt(byte[] key, byte[] encryptText) throws EncryptException {
+    public byte[] decrypt(byte[] key, byte[] keyIv,byte[] encryptText) throws EncryptException {
         Key secretKey = convertKey(key);
         byte[] decryptData = null;
         Cipher cipher = null;

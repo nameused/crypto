@@ -17,13 +17,15 @@
 package org.crypto.algorithm.international.encryption;
 
 import org.crypto.common.exception.EncryptException;
+import org.crypto.common.log.CryptoLog;
+import org.crypto.common.log.CryptoLogFactory;
 import org.crypto.intfs.IEncrypt;
 
 import javax.crypto.*;
 import javax.crypto.spec.DESKeySpec;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 
 /**
@@ -32,33 +34,85 @@ import java.security.spec.InvalidKeySpecException;
  * @Company Dingxuan
  */
 public class DES implements IEncrypt {
+
+    private static CryptoLog log = CryptoLogFactory.getLog(DES.class);
+
+    private static final String KEY_ALGORITHM = "DES";
+
+    private static final String CIPHER_ALGORITHM = "DES/ECB/PKCS5Padding";
+
+    /**
+     * 密钥转换
+     *
+     * @param key
+     * @return
+     * @throws EncryptException
+     */
+    private static Key convertKey(byte[] key) throws EncryptException {
+        SecretKey secretKey = null;
+        try {
+            DESKeySpec desKeySpec = new DESKeySpec(key);
+            SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance(KEY_ALGORITHM);
+            secretKey = secretKeyFactory.generateSecret(desKeySpec);
+        } catch (InvalidKeyException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+            log.error(e.getMessage());
+            throw new EncryptException(e.getMessage(), e);
+        }
+        return secretKey;
+    }
+
+    /**
+     * 密钥初始化
+     * <p>
+     * java 6 支持56位密钥
+     * BC 支持64位密钥
+     *
+     * @param keyLength
+     * @return
+     * @throws EncryptException
+     */
+    public  byte[] genKey(int keyLength) throws EncryptException {
+        KeyGenerator keyGenerator = null;
+        try {
+            keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM);
+        } catch (NoSuchAlgorithmException e) {
+            log.error(e.getMessage());
+            throw new EncryptException(e.getMessage(), e);
+        }
+        keyGenerator.init(keyLength);
+        SecretKey secretKey = keyGenerator.generateKey();
+        return secretKey.getEncoded();
+    }
+
     @Override
-    public byte[] enprypt(byte[] key, byte[] originalText, String encryptMode) throws EncryptException {
-        SecureRandom secureRandom = new SecureRandom();
-        // 从原始密钥数据创建DESKeySpec对象
-        DESKeySpec dks = null;
-        Cipher cipher = null;
+    public byte[] enprypt(byte[] key, byte[] originalText) throws EncryptException {
+        Key secretKey = convertKey(key);
         byte[] encryptData = null;
         try {
-            dks = new DESKeySpec(key);
-            // 创建一个密钥工厂，然后用它把DESKeySpec转换成SecretKey对象
-            SecretKeyFactory keyFactory = null;
-            keyFactory = SecretKeyFactory.getInstance("DES");
-            SecretKey securekey = null;
-            securekey = keyFactory.generateSecret(dks);
-            // Cipher对象实际完成加密操作
-            cipher = Cipher.getInstance("DES");
-            cipher.init(Cipher.ENCRYPT_MODE, securekey, secureRandom);
+            Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             encryptData = cipher.doFinal(originalText);
-        } catch (InvalidKeyException | InvalidKeySpecException | NoSuchAlgorithmException
+        } catch (InvalidKeyException | NoSuchAlgorithmException
                 | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new EncryptException(e.getMessage(), e);
         }
         return encryptData;
     }
 
     @Override
-    public byte[] decrypt(byte[] key, byte[] encryptText, String encryptMode) throws EncryptException {
-        return new byte[0];
+    public byte[] decrypt(byte[] key, byte[] encryptText) throws EncryptException {
+        Key secretKey = convertKey(key);
+        byte[] decryptData = null;
+        Cipher cipher = null;
+        try {
+            cipher = Cipher.getInstance(CIPHER_ALGORITHM);
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            decryptData = cipher.doFinal(encryptText);
+        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) {
+            log.error(e.getMessage());
+            throw new EncryptException(e.getMessage(), e);
+        }
+        return decryptData;
     }
 }

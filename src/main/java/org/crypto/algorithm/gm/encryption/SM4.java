@@ -16,6 +16,7 @@
 
 package org.crypto.algorithm.gm.encryption;
 
+import org.crypto.common.exception.EncryptException;
 import org.crypto.intfs.IEncrypt;
 
 /**
@@ -25,7 +26,12 @@ import org.crypto.intfs.IEncrypt;
  */
 public class SM4 implements IEncrypt {
     @Override
-    public byte[] enprypt() {
+    public byte[] enprypt(byte[] key, byte[] originalText) throws EncryptException {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] decrypt(byte[] key, byte[] encryptText) throws EncryptException {
         return new byte[0];
     }
 }

@@ -21,7 +21,7 @@ public class RSATest {
     @Before
     public void setup() throws SignException {
         rsa = new RSA();
-        keyPair = rsa.genKeyPair(2048);
+        keyPair = rsa.genKeyPair(1024);
     }
 
     @Test

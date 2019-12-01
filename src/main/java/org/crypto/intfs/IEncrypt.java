@@ -15,15 +15,14 @@ public interface IEncrypt {
      * @param originalText
      * @return
      */
-    byte[] enprypt(byte[] key, byte[] originalText, String encryptMode) throws EncryptException;
+    byte[] enprypt(byte[] key, byte[] originalText) throws EncryptException;
 
     /**
      * 数据解密
      *
      * @param key
      * @param encryptText
-     * @param encryptMode
      * @return
      */
-    byte[] decrypt(byte[] key, byte[] encryptText, String encryptMode) throws EncryptException;
+    byte[] decrypt(byte[] key, byte[] encryptText) throws EncryptException;
 }

@@ -20,18 +20,21 @@ import org.crypto.common.exception.EncryptException;
 import org.crypto.intfs.IEncrypt;
 
 /**
+ * SM4实现
+ *
  * @Author: zhangmingyang
  * @Date: 2019/11/19
  * @Company Dingxuan
  */
 public class SM4 implements IEncrypt {
+
     @Override
-    public byte[] enprypt(byte[] key, byte[] keyIv,byte[] originalText) throws EncryptException {
+    public byte[] encrypt(String cipherAlgorithm, byte[] key, byte[] iv, byte[] originalText) throws EncryptException {
         return new byte[0];
     }
 
     @Override
-    public byte[] decrypt(byte[] key,byte[] keyIv, byte[] encryptText) throws EncryptException {
+    public byte[] decrypt(String cipherAlgorithm, byte[] key, byte[] iv, byte[] encryptText) throws EncryptException {
         return new byte[0];
     }
 }

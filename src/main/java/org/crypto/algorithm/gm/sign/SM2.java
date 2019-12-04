@@ -37,7 +37,7 @@ public class SM2 implements ISign {
     private static CryptoLog log = CryptoLogFactory.getLog(SM2.class);
     private static final String KEY_ALGORITHM = "EC";
     private static final String PROVIDER = "BC";
-    private static final String KEY_GEN_PARAMTER = "sm2p256v1";
+    private static final String KEY_GEN_PARAMETER = "sm2p256v1";
 
     @Override
     public KeyPair genKeyPair(int keySize) throws SignException {
@@ -45,7 +45,7 @@ public class SM2 implements ISign {
         try {
             Security.addProvider(new BouncyCastleProvider());
             generator = KeyPairGenerator.getInstance(KEY_ALGORITHM, PROVIDER);
-            generator.initialize(new ECNamedCurveGenParameterSpec(KEY_GEN_PARAMTER));
+            generator.initialize(new ECNamedCurveGenParameterSpec(KEY_GEN_PARAMETER));
         } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             log.error(e.getMessage());
             throw new SignException(e.getMessage(), e);

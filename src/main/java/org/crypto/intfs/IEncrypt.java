@@ -9,24 +9,24 @@ import org.crypto.common.exception.EncryptException;
  */
 public interface IEncrypt {
     /**
-     * 加密
-     *
+     *加密
+     * @param cipherAlgorithm 加密算法及填充方式
      * @param key
-     * @param keyIv
+     * @param iv  ecb模式无需传值
      * @param originalText
      * @return
      * @throws EncryptException
      */
-    byte[] enprypt(byte[] key, byte[] keyIv, byte[] originalText) throws EncryptException;
+    byte[] encrypt(String cipherAlgorithm,byte[] key, byte[] iv, byte[] originalText) throws EncryptException;
 
     /**
      * 解密
-     *
+     * @param cipherAlgorithm 加密算法及填充方式
      * @param key
-     * @param keyIv
+     * @param iv ecb模式无需传值
      * @param encryptText
      * @return
      * @throws EncryptException
      */
-    byte[] decrypt(byte[] key, byte[] keyIv, byte[] encryptText) throws EncryptException;
+    byte[] decrypt(String cipherAlgorithm,byte[] key, byte[] iv, byte[] encryptText) throws EncryptException;
 }

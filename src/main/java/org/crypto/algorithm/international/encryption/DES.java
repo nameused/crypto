@@ -16,6 +16,7 @@
 
 package org.crypto.algorithm.international.encryption;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.crypto.common.exception.EncryptException;
 import org.crypto.common.log.CryptoLog;
 import org.crypto.common.log.CryptoLogFactory;
@@ -23,12 +24,13 @@ import org.crypto.intfs.IEncrypt;
 
 import javax.crypto.*;
 import javax.crypto.spec.DESKeySpec;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
+import javax.crypto.spec.IvParameterSpec;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 
 /**
+ * DES加密算法实现
+ *
  * @Author: zhangmingyang
  * @Date: 2019/11/19
  * @Company Dingxuan
@@ -38,8 +40,6 @@ public class DES implements IEncrypt {
     private static CryptoLog log = CryptoLogFactory.getLog(DES.class);
 
     private static final String KEY_ALGORITHM = "DES";
-
-    private static final String CIPHER_ALGORITHM = "DES/ECB/PKCS5Padding";
 
     /**
      * 密钥转换
@@ -66,12 +66,15 @@ public class DES implements IEncrypt {
      * <p>
      * java 6 支持56位密钥
      * BC 支持64位密钥
-     *
+     * 替换keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM);
+     * 为如下:
+     * Security.addProvider(new BouncyCastleProvider());
+     * keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM,"BC");
      * @param keyLength
      * @return
      * @throws EncryptException
      */
-    public  byte[] genKey(int keyLength) throws EncryptException {
+    public byte[] genKey(int keyLength) throws EncryptException {
         KeyGenerator keyGenerator = null;
         try {
             keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM);
@@ -85,15 +88,20 @@ public class DES implements IEncrypt {
     }
 
     @Override
-    public byte[] enprypt(byte[] key, byte[] keyIv, byte[] originalText) throws EncryptException {
+    public byte[] encrypt(String cipherAlgorithm, byte[] key, byte[] iv, byte[] originalText) throws EncryptException {
         Key secretKey = convertKey(key);
         byte[] encryptData = null;
         try {
-            Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            Cipher cipher = Cipher.getInstance(cipherAlgorithm);
+            if (ArrayUtils.isEmpty(iv)) {
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            } else {
+                IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);
+            }
             encryptData = cipher.doFinal(originalText);
-        } catch (InvalidKeyException | NoSuchAlgorithmException
-                | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) {
+        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+                | BadPaddingException | InvalidAlgorithmParameterException e) {
             log.error(e.getMessage());
             throw new EncryptException(e.getMessage(), e);
         }
@@ -101,15 +109,21 @@ public class DES implements IEncrypt {
     }
 
     @Override
-    public byte[] decrypt(byte[] key, byte[] keyIv,byte[] encryptText) throws EncryptException {
+    public byte[] decrypt(String cipherAlgorithm, byte[] key, byte[] iv, byte[] encryptText) throws EncryptException {
         Key secretKey = convertKey(key);
         byte[] decryptData = null;
         Cipher cipher = null;
         try {
-            cipher = Cipher.getInstance(CIPHER_ALGORITHM);
-            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            cipher = Cipher.getInstance(cipherAlgorithm);
+            if (ArrayUtils.isEmpty(iv)) {
+                cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            } else {
+                IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+                cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
+            }
             decryptData = cipher.doFinal(encryptText);
-        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) {
+        } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException
+                | BadPaddingException | InvalidAlgorithmParameterException e) {
             log.error(e.getMessage());
             throw new EncryptException(e.getMessage(), e);
         }

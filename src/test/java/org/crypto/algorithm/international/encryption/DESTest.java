@@ -57,7 +57,7 @@ public class DESTest {
     public void ecbEncryptTest() throws EncryptException {
         System.out.println("---------------------DES ECB PKCS5Padding---------------------------");
         System.out.println("测试数据16进制字符串:" + Hex.toHexString(testData.getBytes()));
-        System.out.println("秘钥: " + Hex.toHexString(key));
+        System.out.println("密钥: " + Hex.toHexString(key));
         byte[] encryptData = des.encrypt(CIPHER_ALGORITHM_ECB_PKCS5Padding, testData.getBytes(), null, testData.getBytes());
         System.out.println("加密后数据: " + Hex.toHexString(encryptData));
         byte[] originalText = des.decrypt(CIPHER_ALGORITHM_ECB_PKCS5Padding, testData.getBytes(), null, encryptData);
@@ -69,7 +69,7 @@ public class DESTest {
     public void cbcEncryptTest() throws EncryptException {
         System.out.println("---------------------DES CBC PKCS5Padding---------------------------");
         System.out.println("测试数据16进制字符串:" + Hex.toHexString(testData.getBytes()));
-        System.out.println("秘钥: " + Hex.toHexString(key));
+        System.out.println("密钥: " + Hex.toHexString(key));
         byte[] encryptData = des.encrypt(CIPHER_ALGORITHM_CBC_PKCS5Padding, key, key, testData.getBytes());
         System.out.println("加密后数据: " + Hex.toHexString(encryptData));
         byte[] originalText = des.decrypt(CIPHER_ALGORITHM_CBC_PKCS5Padding, key, key, encryptData);

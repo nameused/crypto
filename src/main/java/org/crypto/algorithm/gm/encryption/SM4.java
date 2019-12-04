@@ -16,8 +16,20 @@
 
 package org.crypto.algorithm.gm.encryption;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.crypto.common.exception.EncryptException;
+import org.crypto.common.log.CryptoLog;
+import org.crypto.common.log.CryptoLogFactory;
 import org.crypto.intfs.IEncrypt;
+
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * SM4实现
@@ -27,14 +39,68 @@ import org.crypto.intfs.IEncrypt;
  * @Company Dingxuan
  */
 public class SM4 implements IEncrypt {
+    private static CryptoLog log = CryptoLogFactory.getLog(SM4.class);
+    private static final String KEY_ALGORITHM = "SM4";
+    private static final int DEFAULT_KEY_LENGTH = 128;
+
+    /**
+     * 秘钥生成
+     *
+     * @return
+     * @throws EncryptException
+     */
+    public byte[] genKey(int keyLength) throws EncryptException {
+        KeyGenerator keyGenerator = null;
+        try {
+            keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM,new BouncyCastleProvider());
+        } catch (NoSuchAlgorithmException e) {
+            log.error(e.getMessage());
+            throw new EncryptException(e.getMessage(), e);
+        }
+        keyGenerator.init(keyLength);
+        SecretKey secretKey = keyGenerator.generateKey();
+        return secretKey.getEncoded();
+    }
 
     @Override
     public byte[] encrypt(String cipherAlgorithm, byte[] key, byte[] iv, byte[] originalText) throws EncryptException {
-        return new byte[0];
+        byte[] encryptData = null;
+        try {
+            Cipher cipher = Cipher.getInstance(cipherAlgorithm, new BouncyCastleProvider());
+            Key secretKey = new SecretKeySpec(key, KEY_ALGORITHM);
+            if (ArrayUtils.isEmpty(iv)) {
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            } else {
+                IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);
+            }
+            encryptData = cipher.doFinal(originalText);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |
+                BadPaddingException | InvalidAlgorithmParameterException e) {
+            log.error(e.getMessage());
+            throw new EncryptException(e.getMessage(), e);
+        }
+        return encryptData;
     }
 
     @Override
     public byte[] decrypt(String cipherAlgorithm, byte[] key, byte[] iv, byte[] encryptText) throws EncryptException {
-        return new byte[0];
+        byte[] encryptData = null;
+        try {
+            Cipher cipher = Cipher.getInstance(cipherAlgorithm, new BouncyCastleProvider());
+            Key secretKey = new SecretKeySpec(key, KEY_ALGORITHM);
+            if (ArrayUtils.isEmpty(iv)) {
+                cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            } else {
+                IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+                cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec);
+            }
+            encryptData = cipher.doFinal(encryptText);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException |
+                BadPaddingException | InvalidAlgorithmParameterException e) {
+            log.error(e.getMessage());
+            throw new EncryptException(e.getMessage(), e);
+        }
+        return encryptData;
     }
 }

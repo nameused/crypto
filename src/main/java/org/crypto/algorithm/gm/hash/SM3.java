@@ -28,12 +28,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 
 /**
+ * SM3 实现
+ *
  * @Author: zhangmingyang
  * @Date: 2019/11/19
  * @Company Dingxuan
  */
 public class SM3 implements IHash {
     private static CryptoLog log = CryptoLogFactory.getLog(SM3.class);
+
     @Override
     public byte[] hash(byte[] data) throws HashException {
         if (ArrayUtils.isEmpty(data)) {

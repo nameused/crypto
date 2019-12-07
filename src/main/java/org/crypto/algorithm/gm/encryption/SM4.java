@@ -52,7 +52,7 @@ public class SM4 implements IEncrypt {
     public byte[] genKey(int keyLength) throws EncryptException {
         KeyGenerator keyGenerator = null;
         try {
-            keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM,new BouncyCastleProvider());
+            keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM, new BouncyCastleProvider());
         } catch (NoSuchAlgorithmException e) {
             log.error(e.getMessage());
             throw new EncryptException(e.getMessage(), e);

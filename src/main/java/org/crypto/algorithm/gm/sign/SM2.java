@@ -29,6 +29,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 /**
+ * SM2 实现
+ *
  * @Author: zhangmingyang
  * @Date: 2019/10/25
  * @Company Dingxuan
@@ -54,7 +56,7 @@ public class SM2 implements ISign {
     }
 
     @Override
-    public byte[] sign(byte[] data, PrivateKey privateKey,String signatureAlgorithm) throws SignException {
+    public byte[] sign(byte[] data, PrivateKey privateKey, String signatureAlgorithm) throws SignException {
         Signature signature;
         byte[] signValue;
         try {
@@ -73,7 +75,7 @@ public class SM2 implements ISign {
     }
 
     @Override
-    public boolean verify(byte[] data, PublicKey publicKey, byte[] sign,String signatureAlgorithm) throws SignException {
+    public boolean verify(byte[] data, PublicKey publicKey, byte[] sign, String signatureAlgorithm) throws SignException {
         boolean verify;
         try {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKey.getEncoded());

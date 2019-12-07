@@ -1,5 +1,5 @@
 /**
- * Copyright DingXuan. All Rights Reserved.
+ * Copyright Dingxuan. All Rights Reserved.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.crypto.algorithm.international.hash;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.crypto.common.exception.HashException;
 import org.crypto.common.log.CryptoLog;
@@ -27,25 +27,24 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 
 /**
- * @author zhangmingyang
- * @Date: 11/21/19
- * @Version 1.0.0
+ * @Author: zhangmingyang
+ * @Date: 2019/12/7
+ * @Company Dingxuan
  */
-public class MD4 implements IHash {
-    private static CryptoLog log = CryptoLogFactory.getLog(MD4.class);
-    private static final String ALGORITHM_NAME = "MD4";
+public class RipeMD256 implements IHash {
+    private static CryptoLog log = CryptoLogFactory.getLog(RipeMD256.class);
+    private static final String ALGORITHM_NAME = "RipeMD256";
+
     @Override
     public byte[] hash(byte[] data) throws HashException {
-        if (ArrayUtils.isEmpty(data)) {
-            throw new HashException("Some input is empty");
-        }
+        MessageDigest messageDigest = null;
         Security.addProvider(new BouncyCastleProvider());
-        MessageDigest messageDigest= null;
         try {
             messageDigest = MessageDigest.getInstance(ALGORITHM_NAME);
+
         } catch (NoSuchAlgorithmException e) {
-            log.error(e.getMessage(),e);
-            throw new HashException(e);
+            log.error(e.getMessage());
+            throw new HashException(e.getMessage(), e);
         }
         return messageDigest.digest(data);
     }

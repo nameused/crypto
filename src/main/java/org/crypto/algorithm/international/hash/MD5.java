@@ -31,6 +31,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public class MD5 implements IHash {
     private static CryptoLog log = CryptoLogFactory.getLog(MD5.class);
+    private static final String ALGORITHM_NAME = "MD5";
     @Override
     public byte[] hash(byte[] data) throws HashException {
         if (ArrayUtils.isEmpty(data)) {
@@ -38,7 +39,7 @@ public class MD5 implements IHash {
         }
         MessageDigest messageDigest= null;
         try {
-            messageDigest = MessageDigest.getInstance("MD5");
+            messageDigest = MessageDigest.getInstance(ALGORITHM_NAME);
         } catch (NoSuchAlgorithmException e) {
             log.error(e.getMessage(),e);
             throw new HashException(e);

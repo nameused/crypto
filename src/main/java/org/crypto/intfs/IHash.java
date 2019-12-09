@@ -24,5 +24,11 @@ import org.crypto.common.exception.HashException;
  * @Company Dingxuan
  */
 public interface IHash {
+    /**
+     * 数据哈希
+     * @param data
+     * @return
+     * @throws HashException
+     */
     byte[] hash(byte[] data) throws HashException;
 }

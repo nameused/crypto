@@ -8,6 +8,14 @@ import org.crypto.common.exception.EncryptException;
  * @Company Dingxuan
  */
 public interface IEncrypt {
+
+    /**
+     * 密钥生产
+     * @param keyLength
+     * @return
+     * @throws EncryptException
+     */
+    byte[] genKey(int keyLength) throws EncryptException;
     /**
      *加密
      * @param cipherAlgorithm 加密算法及填充方式

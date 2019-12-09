@@ -49,6 +49,7 @@ public class SM4 implements IEncrypt {
      * @return
      * @throws EncryptException
      */
+    @Override
     public byte[] genKey(int keyLength) throws EncryptException {
         KeyGenerator keyGenerator = null;
         try {

@@ -36,9 +36,11 @@ public class GmUtil {
         // for sm2p256v1, n is 00fffffffeffffffffffffffffffffffff7203df6b21c6052b53bbf40939d54123,
         // r and s are the result of mod n, so they should be less than n and have length<=32
         byte[] rs = rOrS.toByteArray();
-        if (rs.length == RS_LEN) return rs;
-        else if (rs.length == RS_LEN + 1 && rs[0] == 0) return Arrays.copyOfRange(rs, 1, RS_LEN + 1);
-        else if (rs.length < RS_LEN) {
+        if (rs.length == RS_LEN) {
+            return rs;
+        } else if (rs.length == RS_LEN + 1 && rs[0] == 0) {
+            return Arrays.copyOfRange(rs, 1, RS_LEN + 1);
+        } else if (rs.length < RS_LEN) {
             byte[] result = new byte[RS_LEN];
             Arrays.fill(result, (byte) 0);
             System.arraycopy(rs, 0, result, RS_LEN - rs.length, rs.length);
@@ -69,7 +71,9 @@ public class GmUtil {
      * @return rs result in asn1 format
      */
     public static byte[] rsPlainByteArrayToAsn1(byte[] sign){
-        if(sign.length != RS_LEN * 2) throw new RuntimeException("err rs. ");
+        if(sign.length != RS_LEN * 2) {
+            throw new RuntimeException("err rs. ");
+        }
         BigInteger r = new BigInteger(1, Arrays.copyOfRange(sign, 0, RS_LEN));
         BigInteger s = new BigInteger(1, Arrays.copyOfRange(sign, RS_LEN, RS_LEN * 2));
         ASN1EncodableVector v = new ASN1EncodableVector();

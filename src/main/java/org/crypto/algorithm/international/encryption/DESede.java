@@ -1,19 +1,3 @@
-/**
- * Copyright Dingxuan. All Rights Reserved.
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.crypto.algorithm.international.encryption;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -24,22 +8,24 @@ import org.crypto.intfs.IEncrypt;
 
 import javax.crypto.*;
 import javax.crypto.spec.DESKeySpec;
+import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.IvParameterSpec;
-import java.security.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 /**
- * DES加密算法实现
+ * DESede算法实现，及3DES算法
  *
  * @Author: zhangmingyang
- * @Date: 2019/11/19
+ * @Date: 2019/12/9
  * @Company Dingxuan
  */
-public class DES implements IEncrypt {
-
+public class DESede implements IEncrypt {
     private static CryptoLog log = CryptoLogFactory.getLog(DES.class);
-
-    private static final String KEY_ALGORITHM = "DES";
+    private static final String KEY_ALGORITHM = "DESede";
 
 
     /**
@@ -49,10 +35,10 @@ public class DES implements IEncrypt {
      * @return
      * @throws EncryptException
      */
-    private static Key convertKey(byte[] key,String keyAlgorithm) throws EncryptException{
+    private static Key convertKey(byte[] key, String keyAlgorithm) throws EncryptException {
         SecretKey secretKey = null;
         try {
-            DESKeySpec desKeySpec = new DESKeySpec(key);
+            DESedeKeySpec desKeySpec = new DESedeKeySpec(key);
             SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance(keyAlgorithm);
             secretKey = secretKeyFactory.generateSecret(desKeySpec);
         } catch (InvalidKeyException | InvalidKeySpecException | NoSuchAlgorithmException e) {
@@ -60,36 +46,23 @@ public class DES implements IEncrypt {
         }
         return secretKey;
     }
-    /**
-     * 密钥初始化
-     * <p>
-     * java 6 支持56位密钥
-     * BC 支持64位密钥
-     * 替换keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM);
-     * 为如下:
-     * Security.addProvider(new BouncyCastleProvider());
-     * keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM,"BC");
-     * @param keyLength
-     * @return
-     * @throws EncryptException
-     */
+
     @Override
     public byte[] genKey(int keyLength) throws EncryptException {
-        KeyGenerator keyGenerator = null;
         try {
-            keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM);
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM);
+            keyGenerator.init(keyLength);
+            SecretKey secretKey = keyGenerator.generateKey();
+            return secretKey.getEncoded();
         } catch (NoSuchAlgorithmException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
             throw new EncryptException(e.getMessage(), e);
         }
-        keyGenerator.init(keyLength);
-        SecretKey secretKey = keyGenerator.generateKey();
-        return secretKey.getEncoded();
     }
 
     @Override
     public byte[] encrypt(String cipherAlgorithm, byte[] key, byte[] iv, byte[] originalText) throws EncryptException {
-        Key secretKey = convertKey(key,KEY_ALGORITHM);
+        Key secretKey = convertKey(key, KEY_ALGORITHM);
         byte[] encryptData = null;
         try {
             Cipher cipher = Cipher.getInstance(cipherAlgorithm);
@@ -110,7 +83,7 @@ public class DES implements IEncrypt {
 
     @Override
     public byte[] decrypt(String cipherAlgorithm, byte[] key, byte[] iv, byte[] encryptText) throws EncryptException {
-        Key secretKey = convertKey(key,KEY_ALGORITHM);
+        Key secretKey = convertKey(key, KEY_ALGORITHM);
         byte[] decryptData = null;
         Cipher cipher = null;
         try {

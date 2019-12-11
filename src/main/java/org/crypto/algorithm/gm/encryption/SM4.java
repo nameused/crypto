@@ -41,7 +41,6 @@ import java.security.NoSuchAlgorithmException;
 public class SM4 implements IEncrypt {
     private static CryptoLog log = CryptoLogFactory.getLog(SM4.class);
     private static final String KEY_ALGORITHM = "SM4";
-    private static final int DEFAULT_KEY_LENGTH = 128;
 
     /**
      * 秘钥生成

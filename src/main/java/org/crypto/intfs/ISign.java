@@ -13,6 +13,12 @@ import java.security.PublicKey;
  * @Company Dingxuan
  */
 public interface ISign {
+    /**
+     * 密钥对生成
+     * @param keySize
+     * @return
+     * @throws SignException
+     */
 
     KeyPair genKeyPair(int keySize) throws SignException;
 
@@ -22,15 +28,15 @@ public interface ISign {
      * @param privateKey
      * @return
      */
-    byte[] sign(byte[] data, PrivateKey privateKey,String signatrueAlgorithm) throws SignException;
+    byte[] sign(byte[] data, PrivateKey privateKey,String signatureAlgorithm) throws SignException;
 
     /**
      * 数据验签
      * @param data
      * @param publicKey
-     * @param sign
+     * @param signature
      * @return
      */
-    boolean verify(byte[] data, PublicKey publicKey, byte[] sign,String signatrueAlgorithm) throws SignException;
+    boolean verify(byte[] data, PublicKey publicKey, byte[] signature,String signatureAlgorithm) throws SignException;
 
 }

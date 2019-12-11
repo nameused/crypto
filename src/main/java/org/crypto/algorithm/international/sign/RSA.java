@@ -21,6 +21,10 @@ import org.crypto.common.log.CryptoLog;
 import org.crypto.common.log.CryptoLogFactory;
 import org.crypto.intfs.ISign;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -55,7 +59,7 @@ public class RSA implements ISign {
     }
 
     @Override
-    public byte[] sign(byte[] data, PrivateKey privateKey,String signatureAlgorithm) throws SignException {
+    public byte[] sign(byte[] data, PrivateKey privateKey, String signatureAlgorithm) throws SignException {
         PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(privateKey.getEncoded());
         Signature signature;
         byte[] signValue;
@@ -74,7 +78,7 @@ public class RSA implements ISign {
     }
 
     @Override
-    public boolean verify(byte[] data, PublicKey publicKey, byte[] sign,String signatureAlgorithm) throws SignException {
+    public boolean verify(byte[] data, PublicKey publicKey, byte[] sign, String signatureAlgorithm) throws SignException {
         boolean verify;
         try {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKey.getEncoded());
@@ -89,5 +93,52 @@ public class RSA implements ISign {
             throw new SignException(e.getMessage(), e);
         }
         return verify;
+    }
+
+    /**
+     * 公钥加密
+     *
+     * @param originalText
+     * @param key
+     * @return
+     */
+    public byte[] encryptByPublicKey(byte[] originalText, byte[] key) throws SignException {
+        X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(key);
+        Cipher cipher = null;
+        byte[] encryptData = null;
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
+            PublicKey publicKey = keyFactory.generatePublic(x509EncodedKeySpec);
+            cipher = Cipher.getInstance(keyFactory.getAlgorithm());
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            encryptData = cipher.doFinal(originalText);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+            log.error(e.getMessage());
+            throw new SignException(e.getMessage(), e);
+        }
+        return encryptData;
+    }
+
+    /**
+     * 私钥解密
+     *
+     * @param encryptText
+     * @param key
+     * @return
+     */
+    public byte[] decryptByPrivateKey(byte[] encryptText, byte[] key) throws SignException {
+        byte[] encryptData = null;
+        try {
+            PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(key);
+            KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
+            PrivateKey privateKey = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
+            Cipher cipher = Cipher.getInstance(keyFactory.getAlgorithm());
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            encryptData = cipher.doFinal(encryptText);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+            log.error(e.getMessage());
+            throw new SignException(e.getMessage(), e);
+        }
+        return encryptData;
     }
 }

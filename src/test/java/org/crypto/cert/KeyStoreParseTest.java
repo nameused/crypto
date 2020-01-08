@@ -1,8 +1,6 @@
 package org.crypto.cert;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
-import org.bouncycastle.util.encoders.Base64Encoder;
-import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.util.encoders.Base64;
 import org.crypto.common.exception.CertException;
 import org.junit.Before;
 import org.junit.Test;

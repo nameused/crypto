@@ -30,16 +30,12 @@ import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
 import org.bouncycastle.jce.spec.ECParameterSpec;
-import org.bouncycastle.pqc.crypto.gmss.util.GMSSUtil;
-import org.bouncycastle.util.encoders.Hex;
 import org.crypto.common.exception.SignException;
 import org.crypto.common.log.CryptoLog;
 import org.crypto.common.log.CryptoLogFactory;
-import org.crypto.common.utils.GmUtil;
 import org.crypto.intfs.ISign;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;

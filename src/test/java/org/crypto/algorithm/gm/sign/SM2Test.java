@@ -1,9 +1,9 @@
 package org.crypto.algorithm.gm.sign;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
-import org.bouncycastle.crypto.CryptoException;
+
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
+import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
 import org.crypto.common.exception.SignException;
 import org.crypto.common.utils.GmUtil;
@@ -115,7 +115,7 @@ public class SM2Test {
 
 
     @Test
-    public void test() throws SignException, CryptoException {
+    public void test() throws SignException {
         String content = "原文：7468697320697320746573742064617461\n" +
                 "BC实现的签名值：304402201ca079a90590d1190d5b4381bf381a9d44140fe94cec825129ccd1b08dcbac5102202442c430b784633bfafe7547be1f4d94dd36de54edce7897f27142cfecf67c35\n" +
                 "签名长度：560\n" +
@@ -126,13 +126,16 @@ public class SM2Test {
                 "公钥长度：65\n" +
                 "公钥内容：045646548c718c7ef2b70e57091425f487a0285433a57ae82eee9f58db840d4e4714e60e271875cf9e4b56cc2ce5e8490e50269637b2162086e56d46a29d3662b1\n" +
                 "verify result:true";
-        byte[] sk = Hex.decode("009ae9b635077a43aecc013723240ba316f7f74c78bd8958097b1dddadcd2f6c37");
+//        byte[] sk = Hex.decode("009ae9b635077a43aecc013723240ba316f7f74c78bd8958097b1dddadcd2f6c37");
+        //byte[] sk = Hex.decode("128B2FA8BD433C6C068C8D803DFF79792A519A55171B1B650C23661D15897263");
+        byte[] sk = Hex.decode("3690655E33D5EA3D9A4AE1A1ADD766FDEA045CDEAA43A9206FB8C430CEFE0D94");
         PrivateKey privateKey = byteArrayToPrivateKey(sk);
         String data = "this is test data";
         byte[] sign = sm2.sign(data.getBytes(), privateKey, SIGNATURE_ALGORITHM);
         System.out.println("sm2签名值:" + Hex.toHexString(sign));
-        PublicKey publicKey = byteArrayToPublickey(Hex.decode("045646548c718c7ef2b70e57091425f487a0285433a57ae82eee9f58db840d4e4714e60e271875cf9e4b56cc2ce5e8490e50269637b2162086e56d46a29d3662b1"));
-        boolean result = sm2.verify(data.getBytes(), publicKey,Hex.decode("304402201ca079a90590d1190d5b4381bf381a9d44140fe94cec825129ccd1b08dcbac5102202442c430b784633bfafe7547be1f4d94dd36de54edce7897f27142cfecf67c35"), SIGNATURE_ALGORITHM);
+        //PublicKey publicKey = byteArrayToPublickey(Hex.decode("040AE4C7798AA0F119471BEE11825BE46202BB79E2A5844495E97C04FF4DF2548A7C0240F88F1CD4E16352A73C17B7F16F07353E53A176D684A9FE0C6BB798E857"));
+        PublicKey publicKey = byteArrayToPublickey(Hex.decode("04F6E0C3345AE42B51E06BF50B98834988D54EBC7460FE135A48171BC0629EAE205EEDE253A530608178A98F1E19BB737302813BA39ED3FA3C51639D7A20C7391A"));
+        boolean result = sm2.verify(data.getBytes(), publicKey,sign, SIGNATURE_ALGORITHM);
         System.out.println("验签结果：" + result);
     }
 

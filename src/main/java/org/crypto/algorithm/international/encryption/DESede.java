@@ -7,7 +7,6 @@ import org.crypto.common.log.CryptoLogFactory;
 import org.crypto.intfs.IEncrypt;
 
 import javax.crypto.*;
-import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 import java.security.InvalidAlgorithmParameterException;

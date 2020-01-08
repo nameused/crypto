@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.interfaces.ECPublicKey;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,7 +63,7 @@ public class GmUtil {
     /**
      * EC域参数
      */
-    private static ECDomainParameters ecDomainParameters = new ECDomainParameters(x9ECParameters.getCurve(), x9ECParameters.getG(), x9ECParameters.getN());
+    private static ECDomainParameters ecDomainParameters = new ECDomainParameters(x9ECParameters.getCurve(), x9ECParameters.getG(), x9ECParameters.getN(),x9ECParameters.getH());
     /**
      * EC域spec
      */
@@ -153,8 +154,8 @@ public class GmUtil {
         Map<String,BigInteger> bigIntegerMap=getXYCode(pk);
         BigInteger x=bigIntegerMap.get("x");
         BigInteger y=bigIntegerMap.get("y");
-        ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(x9ECParameters.getCurve().createPoint(x, y), ecParameterSpec);
-        PublicKey publicKey = new BCECPublicKey("EC", ecPublicKeySpec, BouncyCastleProvider.CONFIGURATION);
+        ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(ecDomainParameters.getCurve().createPoint(x, y), ecParameterSpec);
+        ECPublicKey publicKey = new BCECPublicKey("EC", ecPublicKeySpec, BouncyCastleProvider.CONFIGURATION);
         return publicKey;
     }
 

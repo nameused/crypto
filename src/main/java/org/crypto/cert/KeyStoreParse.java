@@ -15,7 +15,6 @@
  */
 package org.crypto.cert;
 
-import org.crypto.algorithm.international.encryption.AES;
 import org.crypto.common.exception.CertException;
 import org.crypto.common.log.CryptoLog;
 import org.crypto.common.log.CryptoLogFactory;

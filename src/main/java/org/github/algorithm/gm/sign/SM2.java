@@ -29,7 +29,7 @@ import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
-import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.util.encoders.Hex;
 import org.github.common.exception.SignException;
 import org.github.common.log.CryptoLog;
 import org.github.common.log.CryptoLogFactory;
@@ -58,7 +58,6 @@ public class SM2 implements ISign {
     private static final String KEY_GEN_PARAMETER = "sm2p256v1";
     private static X9ECParameters x9ECParameters = GMNamedCurves.getByName(KEY_GEN_PARAMETER);
     private static ECDomainParameters ecDomainParameters = new ECDomainParameters(x9ECParameters.getCurve(), x9ECParameters.getG(), x9ECParameters.getN());
-    private static ECParameterSpec ecParameterSpec = new ECParameterSpec(x9ECParameters.getCurve(), x9ECParameters.getG(), x9ECParameters.getN());
 
 
     @Override
@@ -84,7 +83,9 @@ public class SM2 implements ISign {
             KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
             PrivateKey priKey = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
             signature = Signature.getInstance(signatureAlgorithm);
-            signature.initSign(priKey);
+            //固定随机数,方便国密测试
+            //signature.initSign(priKey,new SecureRandom(Hex.decode("2C0FFDB039CCB57FFBFF75F821C42AFAC1DFCE4315547DF71DD60E6EDB4A4935")));
+            signature.initSign(priKey, new SecureRandom(Hex.decode("2C0FFDB039CCB57FFBFF75F821C42AFAC1DFCE4315547DF71DD60E6EDB4A4935")));
             signature.update(data);
             signValue = signature.sign();
         } catch (InvalidKeySpecException | NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
@@ -113,7 +114,8 @@ public class SM2 implements ISign {
     }
 
     /**
-     * c1||c2||c3
+     * BC的实现按照老的c1||c2||c3的方式
+     * 进行拼接
      *
      * @param data
      * @param publicKey
@@ -123,7 +125,8 @@ public class SM2 implements ISign {
         BCECPublicKey localECPublicKey = (BCECPublicKey) publicKey;
         ECPublicKeyParameters ecPublicKeyParameters = new ECPublicKeyParameters(localECPublicKey.getQ(), ecDomainParameters);
         SM2Engine sm2Engine = new SM2Engine();
-        sm2Engine.init(true, new ParametersWithRandom(ecPublicKeyParameters, new SecureRandom()));
+        //sm2Engine.init(true, new ParametersWithRandom(ecPublicKeyParameters, new SecureRandom(Hex.decode("2C0FFDB039CCB57FFBFF75F821C42AFAC1DFCE4315547DF71DD60E6EDB4A4935"))));
+        sm2Engine.init(true, new ParametersWithRandom(ecPublicKeyParameters, new SecureRandom(Hex.decode("2C0FFDB039CCB57FFBFF75F821C42AFAC1DFCE4315547DF71DD60E6EDB4A4935"))));
         try {
             return sm2Engine.processBlock(data, 0, data.length);
         } catch (InvalidCipherTextException e) {
@@ -132,9 +135,9 @@ public class SM2 implements ISign {
     }
 
     /**
-     *
      * 旧版sm2私钥解密
      * c1||c2||c3
+     *
      * @param data
      * @param key
      * @return
@@ -152,7 +155,7 @@ public class SM2 implements ISign {
     }
 
     /**
-     * bc加解密使用旧标c1||c3||c2，此方法在解密前调用，将密文转化为c1||c2||c3再去解密
+     * 将c1||c3||c2 转化为c1||c2||c3 再进行解密
      *
      * @param c1c3c2
      * @return
@@ -174,6 +177,7 @@ public class SM2 implements ISign {
 
     /**
      * bc加解密使用旧标c1||c2||c3，此方法在加密后调用，将结果转化为c1||c3||c2
+     *
      * @param c1c2c3
      * @return
      */
@@ -191,25 +195,26 @@ public class SM2 implements ISign {
         return result;
     }
 
-
     /**
-     * c1||c3||c2
+     * c1||c3||c2 格式解密
+     *
      * @param data
      * @param key
      * @return
      */
-    public static byte[] sm2Decrypt(byte[] data, PrivateKey key){
+    public  byte[] decrypt(byte[] data, PrivateKey key) {
         return sm2DecryptOld(changeC1C3C2ToC1C2C3(data), key);
     }
 
     /**
-     * c1||c3||c2
+     * c1||c3||c2 格式加密
+     *
      * @param data
      * @param key
      * @return
      */
 
-    public static byte[] sm2Encrypt(byte[] data, PublicKey key){
+    public  byte[] encrypt(byte[] data, PublicKey key) {
         return changeC1C2C3ToC1C3C2(sm2EncryptOld(data, key));
     }
 
@@ -224,6 +229,7 @@ public class SM2 implements ISign {
         int curveLength = getCurveLength(ecDomainParameters);
         return encodeSM2CipherToDER(curveLength, 32, cipher);
     }
+
     /**
      * DER编码C1C3C2密文（根据《SM2密码算法使用规范》 GM/T 0009-2012）
      *
@@ -236,22 +242,17 @@ public class SM2 implements ISign {
     public static byte[] encodeSM2CipherToDER(int curveLength, int digestLength, byte[] cipher)
             throws IOException {
         int startPos = 1;
-
         byte[] c1x = new byte[curveLength];
         System.arraycopy(cipher, startPos, c1x, 0, c1x.length);
         startPos += c1x.length;
-
         byte[] c1y = new byte[curveLength];
         System.arraycopy(cipher, startPos, c1y, 0, c1y.length);
         startPos += c1y.length;
-
         byte[] c2 = new byte[cipher.length - c1x.length - c1y.length - 1 - digestLength];
         System.arraycopy(cipher, startPos, c2, 0, c2.length);
         startPos += c2.length;
-
         byte[] c3 = new byte[digestLength];
         System.arraycopy(cipher, startPos, c3, 0, c3.length);
-
         ASN1Encodable[] arr = new ASN1Encodable[4];
         arr[0] = new ASN1Integer(c1x);
         arr[1] = new ASN1Integer(c1y);

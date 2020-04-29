@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.*;
 
 import static org.github.common.utils.GmUtil.*;
@@ -36,107 +37,71 @@ public class SM2Test {
 
     @Test
     public void genKeyPair() {
-        System.out.println("privateKey:" + Base64.encode(keyPair.getPrivate().getEncoded()));
-        System.out.println("publicKey:" + Base64.encode(keyPair.getPublic().getEncoded()));
+        System.out.println("privateKey:" + Base64.toBase64String(keyPair.getPrivate().getEncoded()));
+        System.out.println("publicKey:" + Base64.toBase64String(keyPair.getPublic().getEncoded()));
+    }
+
+    @Test
+    public void gmSignDataTest() throws SignException {
+        //国密SM2算法的签名与验签都是预处理前
+        System.out.println("========================基于国密检测工具SM2签名验证测试==========================");
+        byte[] sk = Hex.decode("50E7324D208DC091C089FB98FAEC64468EAE6789B0F707EDFE86EF7CB754DAEA");
+        //sm2签名时制定随机数种子，固定随机数
+        BigInteger bigInteger = new BigInteger("105346645824813091583495808130328573841359553048162952770093773822631478486079");
+        System.out.println("随机数16进制输出:" + Hex.toHexString(BigIntegertoByteArray(bigInteger)));
+        PrivateKey privateKey = byteArrayToPrivateKey(sk);
+        byte[] sign = sm2.sign(Hex.decode("B0448E89946BB21EC649FDF3BA46296602182849FBE2D329AAF843DE0D7CA73F"), privateKey, SIGNATURE_ALGORITHM);
+        byte[] encode = GmUtil.rsAsn1ToPlainByteArray(sign);
+        System.out.println("符合国密标准的签名值:" + Hex.toHexString(encode));
+        PublicKey publicKey = byteArrayToPublickey(Hex.decode("046456CC2649C6216281EE91DCDC5A75C8E92706C3C9B85362796E8E8277BB34A663C11AF6619F6C5A452626EF2703BE187681A816D988467DED48D17E5E54F613"));
+        boolean result = sm2.verify(Hex.decode("B0448E89946BB21EC649FDF3BA46296602182849FBE2D329AAF843DE0D7CA73F"), publicKey, sign, SIGNATURE_ALGORITHM);
+        System.out.println("验证结果:" + result);
+    }
+
+    @Test
+    public void gmEncryptDataTest() throws SignException, IOException {
+        System.out.println("========================基于国密检测工具SM2数据加密验证测试=============开始=============");
+        PublicKey publicKey = byteArrayToPublickey(Hex.decode("046456CC2649C6216281EE91DCDC5A75C8E92706C3C9B85362796E8E8277BB34A663C11AF6619F6C5A452626EF2703BE187681A816D988467DED48D17E5E54F613"));
+        byte[] data = Hex.decode("B0448E89946BB21EC649FDF3BA46296602182849FBE2D329AAF843DE0D7CA73F");
+        BigInteger bigInteger = new BigInteger("105346645824813091583495808130328573841359553048162952770093773822631478486079");
+        PrivateKey privateKey = byteArrayToPrivateKey(Hex.decode("50E7324D208DC091C089FB98FAEC64468EAE6789B0F707EDFE86EF7CB754DAEA"));
+        System.out.println("随机数16进制输出:" + Hex.toHexString(BigIntegertoByteArray(bigInteger)));
+        byte[] encryptData = sm2.sm2EncryptOld(data, publicKey);
+        System.out.println("按照C1||C2||C3的方式加密后的数据:" + Hex.toHexString(encryptData));
+        System.out.println("Der编码后的加密数据：" + Hex.toHexString(SM2.encodeSM2CipherToDER(encryptData)));
+        byte[] content = sm2.sm2DecryptOld(encryptData, privateKey);
+        System.out.println(Hex.toHexString(content));
+        System.out.println("按照C1||C3||C2的方式加密后的数据:" + Hex.toHexString(SM2.changeC1C2C3ToC1C3C2(encryptData)));
+        System.out.println("原数据:"+Hex.toHexString(data));
+        byte[] c1c3c2 = sm2.encrypt(data, publicKey);
+        System.out.println("按照C1||C3||C2的方式加密后的数据:" + Hex.toHexString(c1c3c2));
+        byte[] plainText= sm2.decrypt(c1c3c2, privateKey);
+        System.out.println("解密后的数据:"+Hex.toHexString(plainText));
+        System.out.println("========================基于国密检测工具SM2数据加密验证测试=============结束=============");
     }
 
     @Test
     public void sign() throws SignException {
-
         String data = "this is test data";
         System.out.println("原文：" + Hex.toHexString(data.getBytes()));
         byte[] signature = sm2.sign(data.getBytes(), keyPair.getPrivate(), SIGNATURE_ALGORITHM);
-
         System.out.println("BC实现的签名值：" + Hex.toHexString(signature));
         System.out.println("签名长度：" + signature.length * 8);
-
         //BC　实现的签名值为rs的asn1格式，需要转换为r||s拼接的方式，才符合国密检测工具的验证
         byte[] encode = GmUtil.rsAsn1ToPlainByteArray(signature);
         System.out.println("符合国密标准的签名值:" + Hex.toHexString(encode));
         System.out.println("签名长度：" + encode.length * 8);
-
         //r||s的原文转换为asn1格式
         byte[] decode = GmUtil.rsPlainByteArrayToAsn1(encode);
-
         Assert.assertArrayEquals(signature, decode);
-
         BCECPrivateKey bcecPrivateKey = (BCECPrivateKey) keyPair.getPrivate();
         System.out.println("私钥长度：" + bcecPrivateKey.getD().toByteArray().length);
         System.out.println("私钥内容：" + Hex.toHexString(bcecPrivateKey.getD().toByteArray()));
-
         BCECPublicKey bcecPublicKey = (BCECPublicKey) keyPair.getPublic();
         System.out.println("公钥长度：" + bcecPublicKey.getQ().getEncoded(false).length);
         System.out.println("公钥内容：" + Hex.toHexString(bcecPublicKey.getQ().getEncoded(false)));
-
         boolean result = sm2.verify(data.getBytes(), keyPair.getPublic(), signature, SIGNATURE_ALGORITHM);
         System.out.println("verify result:" + result);
-    }
-
-    @Test
-    public void encrypt() {
-        String data = "this is test data";
-        System.out.println("原文数据：" + Hex.toHexString(data.getBytes()));
-
-        BCECPublicKey bcecPublicKey = (BCECPublicKey) keyPair.getPublic();
-        System.out.println("公钥长度：" + bcecPublicKey.getQ().getEncoded(false).length);
-        System.out.println("公钥内容：" + Hex.toHexString(bcecPublicKey.getQ().getEncoded(false)));
-
-        BCECPrivateKey bcecPrivateKey = (BCECPrivateKey) keyPair.getPrivate();
-        System.out.println("私钥长度：" + bcecPrivateKey.getD().toByteArray().length);
-        System.out.println("私钥内容：" + Hex.toHexString(bcecPrivateKey.getD().toByteArray()));
-
-        byte[] encryptData = sm2.sm2EncryptOld(data.getBytes(), keyPair.getPublic());
-        System.out.println("公钥加密后的数据：" + Hex.toHexString(encryptData));
-        byte[] originalText = sm2.sm2DecryptOld(encryptData, keyPair.getPrivate());
-        System.out.println("解密后的数据：" + Hex.toHexString(originalText));
-    }
-
-    @Test
-    public void encrypt1() throws IOException {
-        String data = "this is test data 12";
-        System.out.println("明文长度：" + data.getBytes().length);
-        System.out.println("原文数据：" + Hex.toHexString(data.getBytes()));
-
-        BCECPublicKey bcecPublicKey = (BCECPublicKey) keyPair.getPublic();
-        System.out.println("公钥长度：" + bcecPublicKey.getQ().getEncoded(false).length);
-        System.out.println("公钥内容：" + Hex.toHexString(bcecPublicKey.getQ().getEncoded(false)));
-
-        BCECPrivateKey bcecPrivateKey = (BCECPrivateKey) keyPair.getPrivate();
-        System.out.println("私钥长度：" + bcecPrivateKey.getD().toByteArray().length);
-        System.out.println("私钥内容：" + Hex.toHexString(bcecPrivateKey.getD().toByteArray()));
-
-        byte[] encryptData = sm2.sm2Encrypt(data.getBytes(), keyPair.getPublic());
-        System.out.println("公钥加密后的数据：" + Hex.toHexString(encryptData));
-        System.out.println("der编码后的加密数据："+Hex.toHexString(sm2.encodeSM2CipherToDER(encryptData)));
-
-        byte[] originalText = sm2.sm2Decrypt(encryptData, keyPair.getPrivate());
-        System.out.println("解密后的数据：" + Hex.toHexString(originalText));
-    }
-
-
-    @Test
-    public void test() throws SignException {
-        String content = "原文：7468697320697320746573742064617461\n" +
-                "BC实现的签名值：304402201ca079a90590d1190d5b4381bf381a9d44140fe94cec825129ccd1b08dcbac5102202442c430b784633bfafe7547be1f4d94dd36de54edce7897f27142cfecf67c35\n" +
-                "签名长度：560\n" +
-                "符合国密标准的签名值:1ca079a90590d1190d5b4381bf381a9d44140fe94cec825129ccd1b08dcbac512442c430b784633bfafe7547be1f4d94dd36de54edce7897f27142cfecf67c35\n" +
-                "签名长度：512\n" +
-                "私钥长度：33\n" +
-                "私钥内容：009ae9b635077a43aecc013723240ba316f7f74c78bd8958097b1dddadcd2f6c37\n" +
-                "公钥长度：65\n" +
-                "公钥内容：045646548c718c7ef2b70e57091425f487a0285433a57ae82eee9f58db840d4e4714e60e271875cf9e4b56cc2ce5e8490e50269637b2162086e56d46a29d3662b1\n" +
-                "verify result:true";
-//        byte[] sk = Hex.decode("009ae9b635077a43aecc013723240ba316f7f74c78bd8958097b1dddadcd2f6c37");
-        //byte[] sk = Hex.decode("128B2FA8BD433C6C068C8D803DFF79792A519A55171B1B650C23661D15897263");
-        byte[] sk = Hex.decode("3690655E33D5EA3D9A4AE1A1ADD766FDEA045CDEAA43A9206FB8C430CEFE0D94");
-        PrivateKey privateKey = byteArrayToPrivateKey(sk);
-        String data = "this is test data";
-        byte[] sign = sm2.sign(data.getBytes(), privateKey, SIGNATURE_ALGORITHM);
-        System.out.println("sm2签名值:" + Hex.toHexString(sign));
-        //PublicKey publicKey = byteArrayToPublickey(Hex.decode("040AE4C7798AA0F119471BEE11825BE46202BB79E2A5844495E97C04FF4DF2548A7C0240F88F1CD4E16352A73C17B7F16F07353E53A176D684A9FE0C6BB798E857"));
-        PublicKey publicKey = byteArrayToPublickey(Hex.decode("04F6E0C3345AE42B51E06BF50B98834988D54EBC7460FE135A48171BC0629EAE205EEDE253A530608178A98F1E19BB737302813BA39ED3FA3C51639D7A20C7391A"));
-        boolean result = sm2.verify(data.getBytes(), publicKey,sign, SIGNATURE_ALGORITHM);
-        System.out.println("验签结果：" + result);
     }
 
 }

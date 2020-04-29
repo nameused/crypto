@@ -198,5 +198,19 @@ public class GmUtil {
         return map;
     }
 
+    /**
+     * 大整形转换字节数组
+     * @param temp
+     * @return
+     */
+    public static byte[] BigIntegertoByteArray(BigInteger temp){
+        byte[] array = temp.toByteArray();
+        if (array[0] == 0) {
+            byte[] tmp = new byte[array.length - 1];
+            System.arraycopy(array, 1, tmp, 0, tmp.length);
+            array = tmp;
+        }
+        return array;
+    }
 
 }

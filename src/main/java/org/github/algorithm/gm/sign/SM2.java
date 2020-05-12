@@ -59,6 +59,9 @@ public class SM2 implements ISign {
     private static X9ECParameters x9ECParameters = GMNamedCurves.getByName(KEY_GEN_PARAMETER);
     private static ECDomainParameters ecDomainParameters = new ECDomainParameters(x9ECParameters.getCurve(), x9ECParameters.getG(), x9ECParameters.getN());
 
+    public SM2() {
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
     @Override
     public KeyPair genKeyPair(int keySize) throws SignException {

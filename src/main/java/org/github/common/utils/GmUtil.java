@@ -21,14 +21,19 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.gm.GMNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
+import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.FixedPointCombMultiplier;
 import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -63,7 +68,7 @@ public class GmUtil {
     /**
      * EC域参数
      */
-    private static ECDomainParameters ecDomainParameters = new ECDomainParameters(x9ECParameters.getCurve(), x9ECParameters.getG(), x9ECParameters.getN(),x9ECParameters.getH());
+    private static ECDomainParameters ecDomainParameters = new ECDomainParameters(x9ECParameters.getCurve(), x9ECParameters.getG(), x9ECParameters.getN(), x9ECParameters.getH());
     /**
      * EC域spec
      */
@@ -150,10 +155,10 @@ public class GmUtil {
      *
      * @return
      */
-    public static PublicKey byteArrayToPublickey(byte[] pk){
-        Map<String,BigInteger> bigIntegerMap=getXYCode(pk);
-        BigInteger x=bigIntegerMap.get("x");
-        BigInteger y=bigIntegerMap.get("y");
+    public static PublicKey byteArrayToPublickey(byte[] pk) {
+        Map<String, BigInteger> bigIntegerMap = getXYCode(pk);
+        BigInteger x = bigIntegerMap.get("x");
+        BigInteger y = bigIntegerMap.get("y");
         ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(ecDomainParameters.getCurve().createPoint(x, y), ecParameterSpec);
         ECPublicKey publicKey = new BCECPublicKey("EC", ecPublicKeySpec, BouncyCastleProvider.CONFIGURATION);
         return publicKey;
@@ -177,6 +182,7 @@ public class GmUtil {
 
     /**
      * 将公钥转换为X,Y
+     *
      * @param bytes
      * @return
      * @throws CryptoException
@@ -200,10 +206,11 @@ public class GmUtil {
 
     /**
      * 大整形转换字节数组
+     *
      * @param temp
      * @return
      */
-    public static byte[] BigIntegertoByteArray(BigInteger temp){
+    public static byte[] BigIntegertoByteArray(BigInteger temp) {
         byte[] array = temp.toByteArray();
         if (array[0] == 0) {
             byte[] tmp = new byte[array.length - 1];
@@ -212,5 +219,21 @@ public class GmUtil {
         }
         return array;
     }
+
+
+    /**
+     * 利用私钥计算公钥
+     *
+     * @param sk
+     * @return
+     */
+    public byte[] getPublickey(byte[] sk) {
+        BigInteger d = GmUtil.byteToBigInteger(sk);
+        ECPoint Q = new FixedPointCombMultiplier().multiply(GmUtil.ecParameterSpec.getG(), d);
+        ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(Q, ecParameterSpec);
+        ECPublicKey ecPublicKey = new BCECPublicKey("EC", ecPublicKeySpec, BouncyCastleProvider.CONFIGURATION);
+        return ((BCECPublicKey) ecPublicKey).getQ().getEncoded(false);
+    }
+
 
 }

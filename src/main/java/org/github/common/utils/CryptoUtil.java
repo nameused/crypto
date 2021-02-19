@@ -6,6 +6,7 @@ import org.bouncycastle.util.encoders.Hex;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Enumeration;
 
 /**
  * 加密常用工具类

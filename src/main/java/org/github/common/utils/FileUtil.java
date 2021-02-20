@@ -1,5 +1,6 @@
 package org.github.common.utils;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 public class FileUtil {
@@ -14,4 +15,13 @@ public class FileUtil {
         }
 
     }
+
+
+    public static byte[] readFile(String path) throws Exception {
+        FileInputStream fileInputStream = new FileInputStream(path);
+        byte[] bytes = new byte[fileInputStream.available()];
+        fileInputStream.read(bytes);
+        return bytes;
+    }
+
 }

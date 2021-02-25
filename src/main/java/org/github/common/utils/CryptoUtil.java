@@ -2,10 +2,12 @@ package org.github.common.utils;
 
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.util.ASN1Dump;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Enumeration;
 
 /**
@@ -20,9 +22,20 @@ public class CryptoUtil {
         return ASN1Dump.dumpAsString(obj);
     }
 
-    public static void main(String[] args) throws IOException {
-        CryptoUtil.parseAsn1Data(Hex.decode("308188020100301306072a8648ce3d020106082a811ccf5501822d046e306c02010102210086ab9d392e8af3a647529922" +
-                "38ec8670255b763796f9bbd9a4f63a235f8262b9a144034200049140b21201150bf095253d64e8279b6d3888eb2461e71cc28f2a07436eec83355084813f6933454985d779bbac880ddded31943976ccced875dd954a5975ac2c"));
+
+
+    /**
+     * 支持将证书、秘钥转换为可写入pem文件的base64格式
+     * @param certificate
+     * @return
+     * @throws Exception
+     */
+    public static String convertBase64Pem(Object certificate) throws Exception{
+        StringWriter sw = new StringWriter();
+        try (JcaPEMWriter pw = new JcaPEMWriter(sw)) {
+            pw.writeObject(certificate);
+        }
+        return sw.toString();
     }
 
 }

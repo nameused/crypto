@@ -1,15 +1,12 @@
 package org.github.cert;
 import junit.framework.TestCase;
-import org.github.algorithm.gm.encryption.SM4;
 import org.github.algorithm.gm.sign.SM2;
 import org.github.algorithm.international.sign.RSA;
 import org.github.common.log.CryptoLog;
 import org.github.common.log.CryptoLogFactory;
 import org.github.common.utils.CryptoUtil;
 import org.github.common.utils.FileUtil;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.FileInputStream;
-import java.security.Key;
 import java.security.KeyPair;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -75,13 +72,5 @@ public class GenCertTest extends TestCase {
 
         FileUtil.writeFile("StandardUserPrivateKey.pem", CryptoUtil.convertBase64Pem(keyPair.getPrivate()));
         FileUtil.writeFile("StandardUserCert.pem", CryptoUtil.convertBase64Pem(certificate));
-    }
-
-    public void testName() throws Exception {
-        SM4 sm4 = new SM4();
-        byte[] key = sm4.genKey(128);
-        Key secretKey = new SecretKeySpec(key, "SM4");
-        String pemString = CryptoUtil.convertBase64Pem(secretKey);
-        log.info("秘钥形式：" + pemString);
     }
 }

@@ -1,27 +1,25 @@
 package org.github.cert;
-import org.bouncycastle.util.encoders.Base64;
+import org.github.common.log.CryptoLog;
+import org.github.common.log.CryptoLogFactory;
 import org.github.common.utils.CertUtil;
-import org.github.common.utils.FileUtil;
 import org.github.intfs.ICert;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
-public class GenCert implements ICert {
 
+public class GenCert implements ICert {
+    private static CryptoLog log = CryptoLogFactory.getLog(GenCert.class);
 
     @Override
     public X509Certificate genGmCaRootCert(KeyPair keyPair, String dn, int validData, String dnsName, String rfc822Name) throws Exception {
-        System.out.println("=============生成国密CA根证书=============");
+        log.info("=============生成国密CA根证书=============");
         X509Certificate cert = CertUtil.genGmCertHelper(keyPair.getPublic(), keyPair.getPrivate(), dn, validData, dnsName, rfc822Name);
-        System.out.println("CA Cert:" + Base64.toBase64String(cert.getEncoded()));
-        FileUtil.saveFile("GMCAPrikey", keyPair.getPrivate().getEncoded());
-        FileUtil.saveFile("GmCARootCert.cer", cert.getEncoded());
         return cert;
     }
 
     @Override
     public X509Certificate genStandardCaRootCert(boolean isCA, KeyPair keyPair, String signAlgorithm, String dn, int validData, String dnsName, String rfc822Name) throws Exception {
-        System.out.println("=============生成非国密证书=============");
+        log.info("=============生成非国密证书=============");
         X509Certificate cert = CertUtil.genStandardCertHelper(isCA, signAlgorithm, keyPair.getPublic(), keyPair.getPrivate(), dn, validData, dnsName, rfc822Name);
         return cert;
     }
@@ -40,11 +38,8 @@ public class GenCert implements ICert {
      * @throws Exception
      */
     public X509Certificate genCertWithCaSign(X509Certificate caRootCert, PrivateKey caPrivateKey, KeyPair keyPair, String signAlgorithm, String dn, int validData, String dnsName, String rfc822Name) throws Exception {
+        log.info("===============生成由CA证书签名的证书===============");
         X509Certificate cert = CertUtil.genCertWithCaSign(caRootCert, caPrivateKey, keyPair.getPublic(), signAlgorithm, dn, validData, dnsName, rfc822Name);
-        System.out.println("用户证书内容：" + cert.toString());
-        System.out.println(" 用户 PrivateKey:" + Base64.toBase64String(keyPair.getPrivate().getEncoded()));
-        FileUtil.saveFile("userPrikey", keyPair.getPrivate().getEncoded());
-        FileUtil.saveFile("user.cer", cert.getEncoded());
         return cert;
     }
 }

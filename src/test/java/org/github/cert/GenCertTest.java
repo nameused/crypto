@@ -1,30 +1,25 @@
 package org.github.cert;
-
-
 import junit.framework.TestCase;
-import org.bouncycastle.openssl.PEMWriter;
-import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.bouncycastle.util.encoders.Base64;
+import org.github.algorithm.gm.encryption.SM4;
 import org.github.algorithm.gm.sign.SM2;
 import org.github.algorithm.international.sign.RSA;
-import org.github.common.utils.CertUtil;
+import org.github.common.log.CryptoLog;
+import org.github.common.log.CryptoLogFactory;
 import org.github.common.utils.CryptoUtil;
 import org.github.common.utils.FileUtil;
-
+import javax.crypto.spec.SecretKeySpec;
 import java.io.FileInputStream;
-import java.io.StringWriter;
-import java.security.KeyFactory;
+import java.security.Key;
 import java.security.KeyPair;
-import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.PKCS8EncodedKeySpec;
 
 
 import java.util.Date;
 
 public class GenCertTest extends TestCase {
+    private static CryptoLog log = CryptoLogFactory.getLog(GenCertTest.class);
     private GenCert genCert;
 
     public void setUp() throws Exception {
@@ -32,39 +27,61 @@ public class GenCertTest extends TestCase {
     }
 
     public void testGenGmCaRootCert() throws Exception {
-        System.out.println("-----------------生成国密根证书-----------------");
+        log.info("-----------------生成国密根证书-----------------");
         SM2 sm2 = new SM2();
         KeyPair keyPair = sm2.genKeyPair(0);
-        new GenCert().genGmCaRootCert(keyPair, "C=CN,CN=GM ROOT CA,S=Guangdong,L=shenzhen,O=TopChain,OU=dep", 20, "www.test.com", "123@gmail.com");
-        System.out.println();
+        X509Certificate gmCaRootCert = new GenCert().genGmCaRootCert(keyPair, "C=CN,CN=GM ROOT CA,S=Guangdong,L=shenzhen,O=TopChain,OU=dep",
+                20, "www.test.com", "123@gmail.com");
+        log.info("私钥格式：\n" + CryptoUtil.convertBase64Pem(keyPair.getPrivate()));
+        FileUtil.writeFile("GmCAPrikey.pem", CryptoUtil.convertBase64Pem(keyPair.getPrivate()));
+        //FileUtil.writeFile("GmCAPrikey.pem", CryptoUtil.convertBase64Pem(keyPair.getPrivate()));
+        FileUtil.writeFile("GmCARootCert.pem", CryptoUtil.convertBase64Pem(gmCaRootCert));
     }
 
     public void testGenStandardCaRootCert() throws Exception {
-        System.out.println("-----------------生成标准根证书-----------------");
+        log.info("-----------------生成标准根证书-----------------");
         RSA rsa = new RSA();
         KeyPair keyPair = rsa.genKeyPair(2048);
-        X509Certificate caRootCert = new GenCert().genStandardCaRootCert(true, keyPair, "sha256withRSA", "C=CN,CN=GM ROOT CA,S=Guangdong,L=shenzhen,O=TopChain,OU=dep", 10, "www.rsa.com", "abc@qq.com");
+        X509Certificate caRootCert = new GenCert().genStandardCaRootCert(true, keyPair, "sha256withRSA",
+                "C=CN,CN=GM ROOT CA,S=Guangdong,L=shenzhen,O=TopChain,OU=dep",
+                10, "www.rsa.com", "abc@qq.com");
+        FileUtil.writeFile("StandardCaPriKey.pem", CryptoUtil.convertBase64Pem(keyPair.getPrivate()));
         FileUtil.writeFile("StandardCaRootCert.pem", CryptoUtil.convertBase64Pem(caRootCert));
     }
 
-    public void testGenCertWithCaSign() throws Exception {
-        System.out.println("-----------------生成国密用户证书-----------------");
+    public void testGenGmCertWithCaSign() throws Exception {
+        log.info("-----------------生成国密用户证书-----------------");
         SM2 sm2 = new SM2();
-        KeyPair keyPair1 = sm2.genKeyPair(0);
+        KeyPair keyPair = sm2.genKeyPair(0);
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X509", "BC");
-        Certificate caRootCert = certificateFactory.generateCertificate(new FileInputStream("GmCARootCert.cer"));
-        KeyFactory keyFactory = KeyFactory.getInstance("EC");
-        PKCS8EncodedKeySpec pkcs8EncodedKeySpec = new PKCS8EncodedKeySpec(FileUtil.readFile("GmCAPrikey"));
-        PrivateKey caPrivateKey = keyFactory.generatePrivate(pkcs8EncodedKeySpec);
-        X509Certificate certificate = new GenCert().genCertWithCaSign((X509Certificate) caRootCert, caPrivateKey, keyPair1, "SM3withSM2", "CN=cms-web", 10, "www.aaa.com", "3434@qq.com");
-        System.out.println("-----------------证书验证-----------------");
+        Certificate caRootCert = certificateFactory.generateCertificate(new FileInputStream("GmCARootCert.pem"));
+        KeyPair keyPair1 = CryptoUtil.parseKeyPairFromPem("GmCAPrikey.pem");
+        X509Certificate certificate = new GenCert().genCertWithCaSign((X509Certificate) caRootCert, keyPair1.getPrivate(), keyPair, "SM3withSM2", "CN=cms-web",
+                10, "www.aaa.com", "3434@qq.com");
         certificate.checkValidity(new Date());
         certificate.verify(caRootCert.getPublicKey());
     }
 
-    public void testGenStandardtCertWithCaSign() throws Exception {
-        SM2 sm2 = new SM2();
-        KeyPair keyPair = sm2.genKeyPair(0);
-        System.out.println(CryptoUtil.convertBase64Pem(keyPair.getPrivate()));
+    public void testGenCertWithCaSign() throws Exception {
+        log.info("-----------------生成标准用户证书-----------------");
+        RSA rsa = new RSA();
+        KeyPair keyPair = rsa.genKeyPair(2048);
+        log.info("私钥格式：\n" + CryptoUtil.convertBase64Pem(keyPair.getPrivate()));
+        KeyPair keyPair1 = CryptoUtil.parseKeyPairFromPem("StandardCaPriKey.pem");
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X509");
+        Certificate caRootCert = certificateFactory.generateCertificate(new FileInputStream("StandardCaRootCert.pem"));
+        X509Certificate certificate = new GenCert().genCertWithCaSign((X509Certificate) caRootCert, keyPair1.getPrivate(), keyPair, "sha256withRSA", "CN=rsa-user",
+                10, "www.rsa-user.com", "3434@qq.com");
+
+        FileUtil.writeFile("StandardUserPrivateKey.pem", CryptoUtil.convertBase64Pem(keyPair.getPrivate()));
+        FileUtil.writeFile("StandardUserCert.pem", CryptoUtil.convertBase64Pem(certificate));
+    }
+
+    public void testName() throws Exception {
+        SM4 sm4 = new SM4();
+        byte[] key = sm4.genKey(128);
+        Key secretKey = new SecretKeySpec(key, "SM4");
+        String pemString = CryptoUtil.convertBase64Pem(secretKey);
+        log.info("秘钥形式：" + pemString);
     }
 }

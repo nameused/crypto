@@ -49,11 +49,22 @@ public class GenCRLTest {
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X509");
         X509CRL crl = (X509CRL) certificateFactory.generateCRL(new FileInputStream("standardCaCRL.crl"));
         X509Certificate userCert = (X509Certificate) certificateFactory.generateCertificate(new FileInputStream("StandardUserCert.pem"));
+
+       // crl.verify(userCert.getPublicKey());
+
         boolean isRevoked = crl.isRevoked(userCert);
         X509CRLEntry revokedCertificate = crl.getRevokedCertificate(userCert.getSerialNumber());
         if (revokedCertificate != null) {
             System.out.println("Revoked");
         }
-        log.info("该证书是否被吊销：" + isRevoked);
+       // log.info("该证书是否被吊销：" + isRevoked);
     }
+
+    @Test
+    public void updateCrl(){
+
+
+
+    }
+
 }

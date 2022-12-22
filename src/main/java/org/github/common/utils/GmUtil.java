@@ -15,10 +15,7 @@
  */
 package org.github.common.utils;
 
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.gm.GMNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
@@ -235,5 +232,21 @@ public class GmUtil {
         return ((BCECPublicKey) ecPublicKey).getQ().getEncoded(false);
     }
 
+
+    //asn1格式私钥转换国密 格式私钥
+    public static byte[] toGMprivateKey(byte[] privatekey) throws Exception {
+        ASN1Sequence seq = ASN1Sequence.getInstance(privatekey);
+
+        ASN1Encodable asn1Encodable = seq.getObjectAt(2);
+        DEROctetString eEROctetString = (DEROctetString)asn1Encodable;
+        //System.out.println("publicKey Hex :" + getHexString(eEROctetString.getOctets(),true));
+
+        DLSequence dLSequence = (DLSequence ) ASN1Sequence
+                .fromByteArray(eEROctetString.getOctets());
+        asn1Encodable = dLSequence.getObjectAt(1);
+        eEROctetString = (DEROctetString)asn1Encodable;
+        return eEROctetString.getOctets();
+
+    }
 
 }

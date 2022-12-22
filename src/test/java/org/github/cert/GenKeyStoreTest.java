@@ -10,9 +10,9 @@ import static org.junit.Assert.*;
 public class GenKeyStoreTest {
     @Test
     public void genKeyStore() throws Exception {
-        //GenKeyStore.genKeyStore("D:\\code\\java-code\\crypto\\StandardCaRootCert.pem", "D:\\code\\java-code\\crypto\\StandardCaPriKey.pem ", "111111");
         Security.addProvider(new BouncyCastleProvider());
-        GenKeyStore.genGmKeyStore("D:\\code\\java-code\\crypto\\GmCARootCert.pem", "D:\\code\\java-code\\crypto\\GmCAPrikey.pem", "111111");
+        GenKeyStore.genKeyStore("D:\\code\\java-code\\crypto\\StandardUserCert.pem", "D:\\code\\java-code\\crypto\\StandardUserPrivateKey.pem ", "123456");
+        //  GenKeyStore.genGmKeyStore("D:\\code\\java-code\\crypto\\GmCARootCert.pem", "D:\\code\\java-code\\crypto\\GmCAPrikey.pem", "111111");
     }
 
 }

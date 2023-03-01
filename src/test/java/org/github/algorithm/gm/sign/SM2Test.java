@@ -2,6 +2,7 @@ package org.github.algorithm.gm.sign;
 
 
 import netscape.javascript.JSUtil;
+import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -16,6 +17,7 @@ import org.github.common.utils.GmUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import sun.security.x509.X509CertImpl;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,9 +26,11 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 
@@ -81,6 +85,7 @@ public class SM2Test {
     @Test
     public void gmEncryptDataTest() throws SignException, IOException {
         System.out.println("========================基于国密检测工具SM2数据加密验证测试=============开始=============");
+        sm2.genKeyPair(0).getPublic().getEncoded();
         PublicKey publicKey = byteArrayToPublickey(Hex.decode("046456CC2649C6216281EE91DCDC5A75C8E92706C3C9B85362796E8E8277BB34A663C11AF6619F6C5A452626EF2703BE187681A816D988467DED48D17E5E54F613"));
         byte[] data = Hex.decode("B0448E89946BB21EC649FDF3BA46296602182849FBE2D329AAF843DE0D7CA73F");
         BigInteger bigInteger = new BigInteger("105346645824813091583495808130328573841359553048162952770093773822631478486079");
@@ -329,13 +334,21 @@ public class SM2Test {
         System.out.println(privateKey.getEncoded().length);
 
 
-
-        PrivateKey privateKey1=byteArrayToPrivateKey(skp);
+        PrivateKey privateKey1 = byteArrayToPrivateKey(skp);
         byte[] testData = "124".getBytes(StandardCharsets.UTF_8);
         PublicKey publicKey = byteArrayToPublickey(pubKey);
         byte[] sign = sm2.sign(testData, privateKey1, "SM3WithSM2");
         boolean result = sm2.verify(testData, publicKey, sign, "SM3WithSM2");
         System.out.println("验签结果：" + result);
+    }
+
+
+    @Test
+    public void qimingTest() throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X509");
+        Certificate certificate = certificateFactory.generateCertificate(new FileInputStream("D:\\code\\java-code\\crypto\\test-cert\\111.pem"));
+        System.out.println(certificate.getType());
     }
 
 

@@ -88,7 +88,7 @@ public class SM2 implements ISign {
             signature = Signature.getInstance(signatureAlgorithm);
             //固定随机数,方便国密测试
             //signature.initSign(priKey,new SecureRandom(Hex.decode("2C0FFDB039CCB57FFBFF75F821C42AFAC1DFCE4315547DF71DD60E6EDB4A4935")));
-            signature.initSign(priKey, new SecureRandom(Hex.decode("2C0FFDB039CCB57FFBFF75F821C42AFAC1DFCE4315547DF71DD60E6EDB4A4935")));
+            signature.initSign(priKey, new SecureRandom());
             signature.update(data);
             signValue = signature.sign();
         } catch (InvalidKeySpecException | NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {

@@ -1,14 +1,18 @@
 package org.github.cert;
 
+import org.bouncycastle.util.encoders.Hex;
 import org.github.algorithm.international.sign.RSA;
 import org.github.common.log.CryptoLog;
 import org.github.common.log.CryptoLogFactory;
 import org.github.common.utils.CryptoUtil;
 import org.github.common.utils.FileUtil;
 import org.junit.Test;
+import sun.security.x509.X509CRLImpl;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.security.KeyPair;
+import java.security.PublicKey;
 import java.security.cert.*;
 
 import static org.junit.Assert.*;
@@ -22,7 +26,7 @@ public class GenCRLTest {
         KeyPair keyPair = CryptoUtil.parseKeyPairFromPem("StandardCaPriKey.pem");
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X509");
         X509Certificate caRootCert = (X509Certificate) certificateFactory.generateCertificate(new FileInputStream("StandardCaRootCert.pem"));
-        X509Certificate userCert = (X509Certificate) certificateFactory.generateCertificate(new FileInputStream("StandardUserCert.pem"));
+        X509Certificate userCert = (X509Certificate) certificateFactory.generateCertificate(new FileInputStream("StandardUser1Cert.pem"));
         //unspecified 0	未指定
         //keyCompromise 1	私钥泄漏
         //cACompromise 2	CA 私钥可能泄漏
@@ -36,9 +40,9 @@ public class GenCRLTest {
         X509CRL crl = new GenCRL().genCaCRL(keyPair.getPrivate(), caRootCert, userCert.getSerialNumber(), 1, "sha256withRSA");
         FileUtil.writeFile("standardCaCRL.crl", CryptoUtil.convertBase64Pem(crl));
         log.info("---crl验证-----");
-        caRootCert.getPublicKey();
-        KeyPair kp= new RSA().genKeyPair(2048);
-        crl.verify(kp.getPublic());
+        PublicKey publicKey=caRootCert.getPublicKey();
+//        KeyPair kp= new RSA().genKeyPair(2048);
+        crl.verify(publicKey);
         boolean isRevoked = crl.isRevoked(userCert);
         log.info("该证书是否被吊销：" + isRevoked);
     }
@@ -53,15 +57,23 @@ public class GenCRLTest {
        // crl.verify(userCert.getPublicKey());
 
         boolean isRevoked = crl.isRevoked(userCert);
-        X509CRLEntry revokedCertificate = crl.getRevokedCertificate(userCert.getSerialNumber());
-        if (revokedCertificate != null) {
+        X509CRLEntry x509CRLEntry = crl.getRevokedCertificate(userCert.getSerialNumber());
+        if (x509CRLEntry != null) {
             System.out.println("Revoked");
         }
-       // log.info("该证书是否被吊销：" + isRevoked);
+       log.info("该证书是否被吊销：" + isRevoked);
     }
 
     @Test
-    public void updateCrl(){
+    public void updateCRL() throws Exception {
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X509");
+        X509Certificate caRootCert = (X509Certificate) certificateFactory.generateCertificate(new FileInputStream("StandardCaRootCert.pem"));
+        X509CRL crl = (X509CRL) certificateFactory.generateCRL(new FileInputStream("standardCaCRL.crl"));
+        X509Certificate userCert = (X509Certificate) certificateFactory.generateCertificate(new FileInputStream("StandardUser3Cert.pem"));
+        KeyPair keyPair = CryptoUtil.parseKeyPairFromPem("StandardCaPriKey.pem");
+        System.out.println(Hex.toHexString(userCert.getSerialNumber().toByteArray()));
+        X509CRL x509CRL = new GenCRL().updateCaCRL(crl,keyPair.getPrivate(), caRootCert, userCert.getSerialNumber(), 2);
+        FileUtil.writeFile("standardCaCRL.crl", CryptoUtil.convertBase64Pem(x509CRL));
 
 
 

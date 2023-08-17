@@ -345,10 +345,34 @@ public class SM2Test {
 
     @Test
     public void qimingTest() throws Exception {
-        Security.addProvider(new BouncyCastleProvider());
-        CertificateFactory certificateFactory = CertificateFactory.getInstance("X509");
+        CertificateFactory certificateFactory = CertificateFactory.getInstance("X509", "BC");
         Certificate certificate = certificateFactory.generateCertificate(new FileInputStream("D:\\code\\java-code\\crypto\\test-cert\\111.pem"));
-        System.out.println(certificate.getType());
+        PublicKey publicKey = certificate.getPublicKey();
+        byte[] testData = java.util.Base64.getDecoder().decode("lPJVo2GJC9JtqYEoD8/CYA011cQTAF7TjLWU7DFM2i0=");
+        System.out.println("摘要16进制字符串：" + Hex.toHexString(testData));
+
+        String random = "15300659017816261783988831211042";
+        String base64_Random = Base64.toBase64String("15300659017816261783988831211042".getBytes(StandardCharsets.UTF_8));
+        System.out.println("随机数的base64字符串：" + base64_Random);
+        byte[] randomBase64 = Base64.decode(random);
+        SM3 sm3 = new SM3();
+
+        byte[] digest = sm3.hash(random.getBytes(StandardCharsets.UTF_8));
+        System.out.println("随机数计算SM3摘要值：" + Hex.toHexString(digest));
+        byte[] sign = java.util.Base64.getDecoder().decode("zWyTDO3dXJyNDnF2k4V+zHViNXRV2R0kKmqJiTsnXnE8gSO2hhDuJRcIJE1hDyTxoxH82Q6/FgTXKHLsxL8Ujw==");
+
+
+        byte[] newSign = GmUtil.rsPlainByteArrayToAsn1(sign);
+        System.out.println(Hex.toHexString(newSign));
+        boolean result = sm2.verify(random.getBytes(StandardCharsets.UTF_8), publicKey, newSign, "SM3WithSM2");
+        System.out.println("验签结果：" + result);
+    }
+
+
+    @Test
+    public void bsTest() {
+        byte[] smkey = Base64.decode("vsp+vuOwW4ZF1MmB3oCSpxnyDhLtkJg4ooTN+tu76Cc=");
+        System.out.println(smkey.length);
     }
 
 

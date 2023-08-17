@@ -67,10 +67,10 @@ public class GenCertTest extends TestCase {
         KeyPair keyPair1 = CryptoUtil.parseKeyPairFromPem("StandardCaPriKey.pem");
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X509");
         Certificate caRootCert = certificateFactory.generateCertificate(new FileInputStream("StandardCaRootCert.pem"));
-        X509Certificate certificate = new GenCert().genCertWithCaSign((X509Certificate) caRootCert, keyPair1.getPrivate(), keyPair, "sha256withRSA", "CN=rsa-user",
-                10, "www.rsa-user.com", "3434@qq.com");
+        X509Certificate certificate = new GenCert().genCertWithCaSign((X509Certificate) caRootCert, keyPair1.getPrivate(), keyPair, "sha256withRSA", "CN=test3",
+                10, "www.333.com", "333@qq.com");
 
-        FileUtil.writeFile("StandardUserPrivateKey.pem", CryptoUtil.convertBase64Pem(keyPair.getPrivate()));
-        FileUtil.writeFile("StandardUserCert.pem", CryptoUtil.convertBase64Pem(certificate));
+        FileUtil.writeFile("StandardUser3PrivateKey.pem", CryptoUtil.convertBase64Pem(keyPair.getPrivate()));
+        FileUtil.writeFile("StandardUser3Cert.pem", CryptoUtil.convertBase64Pem(certificate));
     }
 }

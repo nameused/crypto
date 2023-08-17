@@ -16,7 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 /**
- * DESede算法实现，及3DES算法
+ * DESede算法实现，即3DES算法
  *
  * @Author: zhangmingyang
  * @Date: 2019/12/9

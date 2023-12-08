@@ -29,7 +29,6 @@ import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
-import org.bouncycastle.util.encoders.Hex;
 import org.github.common.exception.SignException;
 import org.github.common.log.CryptoLog;
 import org.github.common.log.CryptoLogFactory;
@@ -63,6 +62,13 @@ public class SM2 implements ISign {
         Security.addProvider(new BouncyCastleProvider());
     }
 
+    /**
+     * sm2密钥长度不用传值
+     *
+     * @param keySize
+     * @return
+     * @throws SignException
+     */
     @Override
     public KeyPair genKeyPair(int keySize) throws SignException {
         KeyPairGenerator generator = null;
@@ -77,6 +83,15 @@ public class SM2 implements ISign {
         return generator.genKeyPair();
     }
 
+    /**
+     * SM2签名
+     *
+     * @param data
+     * @param privateKey
+     * @param signatureAlgorithm
+     * @return
+     * @throws SignException
+     */
     @Override
     public byte[] sign(byte[] data, PrivateKey privateKey, String signatureAlgorithm) throws SignException {
         Signature signature;
@@ -98,6 +113,16 @@ public class SM2 implements ISign {
         return signValue;
     }
 
+    /**
+     * sm2验签
+     *
+     * @param data
+     * @param publicKey
+     * @param sign
+     * @param signatureAlgorithm
+     * @return
+     * @throws SignException
+     */
     @Override
     public boolean verify(byte[] data, PublicKey publicKey, byte[] sign, String signatureAlgorithm) throws SignException {
         boolean verify;
@@ -124,12 +149,12 @@ public class SM2 implements ISign {
      * @param publicKey
      * @return
      */
-    public static byte[] sm2EncryptOld(byte[] data, PublicKey publicKey) {
+    public  byte[] encryptOld(byte[] data, PublicKey publicKey) {
         BCECPublicKey localECPublicKey = (BCECPublicKey) publicKey;
         ECPublicKeyParameters ecPublicKeyParameters = new ECPublicKeyParameters(localECPublicKey.getQ(), ecDomainParameters);
         SM2Engine sm2Engine = new SM2Engine();
         //sm2Engine.init(true, new ParametersWithRandom(ecPublicKeyParameters, new SecureRandom(Hex.decode("2C0FFDB039CCB57FFBFF75F821C42AFAC1DFCE4315547DF71DD60E6EDB4A4935"))));
-        sm2Engine.init(true, new ParametersWithRandom(ecPublicKeyParameters, new SecureRandom(Hex.decode("2C0FFDB039CCB57FFBFF75F821C42AFAC1DFCE4315547DF71DD60E6EDB4A4935"))));
+        sm2Engine.init(true, new ParametersWithRandom(ecPublicKeyParameters, new SecureRandom()));
         try {
             return sm2Engine.processBlock(data, 0, data.length);
         } catch (InvalidCipherTextException e) {
@@ -145,7 +170,7 @@ public class SM2 implements ISign {
      * @param key
      * @return
      */
-    public static byte[] sm2DecryptOld(byte[] data, PrivateKey key) {
+    public byte[] decryptOld(byte[] data, PrivateKey key) {
         BCECPrivateKey localECPrivateKey = (BCECPrivateKey) key;
         ECPrivateKeyParameters ecPrivateKeyParameters = new ECPrivateKeyParameters(localECPrivateKey.getD(), ecDomainParameters);
         SM2Engine sm2Engine = new SM2Engine();
@@ -199,26 +224,27 @@ public class SM2 implements ISign {
     }
 
     /**
-     * c1||c3||c2 格式解密
+     * 新标准中使用 c1||c3||c2 格式解密
      *
      * @param data
      * @param key
      * @return
      */
-    public  byte[] decrypt(byte[] data, PrivateKey key) {
-        return sm2DecryptOld(changeC1C3C2ToC1C2C3(data), key);
+    public byte[] decryptNew(byte[] data, PrivateKey key) {
+        return decryptOld(changeC1C3C2ToC1C2C3(data), key);
     }
 
     /**
-     * c1||c3||c2 格式加密
+     * 新标准中使用 c1||c3||c2 格式加密
+     * 使用原有加密模式，转换为C1C3C2
      *
      * @param data
      * @param key
      * @return
      */
 
-    public  byte[] encrypt(byte[] data, PublicKey key) {
-        return changeC1C2C3ToC1C3C2(sm2EncryptOld(data, key));
+    public byte[] encryptNew(byte[] data, PublicKey key) {
+        return changeC1C2C3ToC1C3C2(encryptOld(data, key));
     }
 
     /**

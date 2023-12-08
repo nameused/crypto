@@ -1,24 +1,18 @@
 package org.github.cert;
 
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.CRLReason;
-import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.X509v2CRLBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.github.common.log.CryptoLog;
 import org.github.common.log.CryptoLogFactory;
-import sun.security.x509.X509CRLImpl;
-
-import java.io.FileOutputStream;
 import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 
@@ -64,8 +58,8 @@ public class GenCRL {
     public X509CRL updateCaCRL(X509CRL initialCRL, PrivateKey caPrivateKey, X509Certificate x509Certificate, BigInteger certId, int i) throws Exception {
         X509CRL crl = null;
         Set<? extends X509CRLEntry> x509CRLEntries = initialCRL.getRevokedCertificates();
-        //判断要更新的id中是否已经包含在crl中，有则不更新
 
+        //判断要更新的id中是否已经包含在crl中，有则不更新
         for (X509CRLEntry x509CRLEntry : x509CRLEntries) {
             if (Objects.equals(x509CRLEntry.getSerialNumber(), certId)){
                 return initialCRL;
@@ -76,6 +70,7 @@ public class GenCRL {
         log.info("吊销列表初始容量" + initialCRL.getRevokedCertificates().size());
 
         X509v2CRLBuilder crlBuilder = null;
+        log.info("吊销证书："+x509CRLEntries.size());
         for (X509CRLEntry x509CRLEntry : x509CRLEntries) {
             BigInteger id = x509CRLEntry.getSerialNumber();
             crlBuilder = new X509v2CRLBuilder(

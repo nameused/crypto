@@ -74,9 +74,6 @@ public class GenCRLTest {
         System.out.println(Hex.toHexString(userCert.getSerialNumber().toByteArray()));
         X509CRL x509CRL = new GenCRL().updateCaCRL(crl,keyPair.getPrivate(), caRootCert, userCert.getSerialNumber(), 2);
         FileUtil.writeFile("standardCaCRL.crl", CryptoUtil.convertBase64Pem(x509CRL));
-
-
-
     }
 
 }

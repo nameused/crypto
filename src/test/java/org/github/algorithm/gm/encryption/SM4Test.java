@@ -68,4 +68,18 @@ public class SM4Test {
         System.out.println(Hex.toHexString(data));
         System.out.println(new String(data));
     }
+
+    @Test
+    public void encTest() throws EncryptException {
+        byte[] key = Hex.decode("B7561508E246B580CB7F1D7B7BC6F948");
+        byte[] data = Hex.decode("A7009665F44878D3AE472FC8B9A3E9AD6DA9B0DC44331EA9D6CF95A3081D4117");
+        SM4 sm4 = new SM4();
+        byte[] result = sm4.encrypt("SM4/CBC/NoPadding", key, Hex.decode("635A1A0CA48551EA72DA1CC6B2BCB33A"), data);
+        System.out.println(Hex.toHexString(result));
+        byte[] data1=Hex.decode("B0448E89946BB21EC649FDF3BA46296602182849FBE2D329AAF843DE0D7CA73F");
+        System.out.println(data1.length);
+
+    }
+
+
 }

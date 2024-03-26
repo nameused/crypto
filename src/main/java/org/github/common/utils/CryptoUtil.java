@@ -1,7 +1,9 @@
 package org.github.common.utils;
 
 import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.util.ASN1Dump;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMDecryptorProvider;
 import org.bouncycastle.openssl.PEMEncryptedKeyPair;
 import org.bouncycastle.openssl.PEMKeyPair;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.security.KeyPair;
 import java.security.PrivateKey;
+import java.security.Security;
 
 /**
  * 加密常用工具类
@@ -54,12 +57,11 @@ public class CryptoUtil {
      * @throws Exception
      */
     public static KeyPair parseKeyPairFromPem(String filePath) throws Exception {
-
+        Security.addProvider(new BouncyCastleProvider());
         PEMParser pemParser = new PEMParser(new FileReader(filePath));
         Object object = pemParser.readObject();
-        //JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
-        JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
 
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
         KeyPair kp;
 
         if (object instanceof PEMEncryptedKeyPair) {
@@ -73,8 +75,51 @@ public class CryptoUtil {
             PEMKeyPair ukp = (PEMKeyPair) object;
             kp = converter.getKeyPair(ukp);
         }
-       // PrivateKey caPrivateKey = kp.getPrivate();
+        // PrivateKey caPrivateKey = kp.getPrivate();
         return kp;
     }
 
+
+    /**
+     * 读取私钥
+     *
+     * @param skPath
+     * @return
+     * @throws Exception
+     */
+
+    public static PrivateKey parsePrivateKeyFromPem(String skPath) throws Exception {
+//        PEMParser pemParser = new PEMParser(new FileReader(skPath));
+//        PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
+//        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider(new BouncyCastleProvider());
+//        KeyPair kp = converter.getKeyPair(pemKeyPair);
+//        return kp.getPrivate();
+
+
+        PEMParser pemParser = new PEMParser(new FileReader(skPath));
+        Object object = pemParser.readObject();
+     //
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+
+        KeyPair key;
+        if (object instanceof PEMEncryptedKeyPair) {
+            System.out.println("Encrypted key - we will use provided password");
+            PEMDecryptorProvider decProv = new JcePEMDecryptorProviderBuilder().build("12345678".toCharArray());
+            key = converter.getKeyPair(((PEMEncryptedKeyPair) object)
+                    .decryptKeyPair(decProv));
+        } else {
+            System.out.println("Unencrypted key - no password needed "+object.getClass().getName());
+            key = converter.getKeyPair((PEMKeyPair) object);
+        }
+        pemParser.close();
+        return key.getPrivate();
+    }
+
+
+    public static void main(String[] args) throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
+        PrivateKey privateKey = CryptoUtil.parsePrivateKeyFromPem("D:\\code\\java-code\\crypto\\GmCAPrikey.pem");
+     //   PrivateKey privateKey = CryptoUtil.parsePrivateKeyFromPem("C:\\Users\\zmy\\Desktop\\CA\\sm2.zmy\\zmy_enc_key.pem");
+        System.out.println(privateKey.getFormat());
+    }
 }

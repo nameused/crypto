@@ -1,5 +1,6 @@
 package org.github.cert;
 import junit.framework.TestCase;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.github.algorithm.gm.sign.SM2;
 import org.github.algorithm.international.sign.RSA;
 import org.github.common.log.CryptoLog;
@@ -8,6 +9,7 @@ import org.github.common.utils.CryptoUtil;
 import org.github.common.utils.FileUtil;
 import java.io.FileInputStream;
 import java.security.KeyPair;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -49,11 +51,12 @@ public class GenCertTest extends TestCase {
     public void testGenGmCertWithCaSign() throws Exception {
         log.info("-----------------生成国密用户证书-----------------");
         SM2 sm2 = new SM2();
+        Security.addProvider(new BouncyCastleProvider());
         KeyPair keyPair = sm2.genKeyPair(0);
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X509", "BC");
         Certificate caRootCert = certificateFactory.generateCertificate(new FileInputStream("GmCARootCert.pem"));
-        KeyPair keyPair1 = CryptoUtil.parseKeyPairFromPem("GmCAPrikey.pem");
-        X509Certificate certificate = new GenCert().genCertWithCaSign((X509Certificate) caRootCert, keyPair1.getPrivate(), keyPair, "SM3withSM2", "CN=cms-web",
+        KeyPair keyPair1 = CryptoUtil.parseKeyPairFromPem("D:\\code\\java-code\\crypto\\GmCARootCert.pem");
+        X509Certificate certificate = new GenCert().genCertWithCaSign((X509Certificate) caRootCert, keyPair1.getPrivate(), keyPair, "SM3withSM2", "CN=verify",
                 10, "www.aaa.com", "3434@qq.com");
         certificate.checkValidity(new Date());
         certificate.verify(caRootCert.getPublicKey());

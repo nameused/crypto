@@ -78,7 +78,6 @@ public class SM4Test {
         System.out.println(Hex.toHexString(result));
         byte[] data1=Hex.decode("B0448E89946BB21EC649FDF3BA46296602182849FBE2D329AAF843DE0D7CA73F");
         System.out.println(data1.length);
-
     }
 
 

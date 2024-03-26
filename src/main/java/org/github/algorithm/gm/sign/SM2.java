@@ -1,5 +1,5 @@
 /**
- * Copyright Dingxuan. All Rights Reserved.
+ * Copyright zmy. All Rights Reserved.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ public class SM2 implements ISign {
      * @param publicKey
      * @return
      */
-    public  byte[] encryptOld(byte[] data, PublicKey publicKey) {
+    public byte[] encryptOld(byte[] data, PublicKey publicKey) {
         BCECPublicKey localECPublicKey = (BCECPublicKey) publicKey;
         ECPublicKeyParameters ecPublicKeyParameters = new ECPublicKeyParameters(localECPublicKey.getQ(), ecDomainParameters);
         SM2Engine sm2Engine = new SM2Engine();
